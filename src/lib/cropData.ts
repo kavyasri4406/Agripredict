@@ -3,6 +3,9 @@ export interface Crop {
   name: string;
   nameTA: string; // Tamil
   nameTE: string; // Telugu
+  nameKN?: string; // Kannada
+  nameML?: string; // Malayalam
+  nameHI?: string; // Hindi
   category: string;
   unit: string;
   basePrice: number;
@@ -1083,3 +1086,49 @@ export function processDocumentOcr(fileName: string): OcrResult {
   };
 }
 
+
+const CROP_TRANSLATIONS: Record<string, { kn: string; ml: string; hi: string }> = {
+  rice: { kn: "ಅಕ್ಕಿ (ಭತ್ತ)", ml: "അരി (നെല്ല്)", hi: "चावल (धान)" },
+  wheat: { kn: "ಗೋಧಿ", ml: "ഗോതമ്പ്", hi: "गेहूं" },
+  corn: { kn: "ಮೆಕ್ಕೆಜೋಳ", ml: "ചോളം", hi: "मक्का" },
+  mustard: { kn: "ಸಾಸಿವೆ", ml: "കടുക്", hi: "सरसों" },
+  cotton: { kn: "ಹತ್ತಿ", ml: "പരുത്തി", hi: "कपास" },
+  tomato: { kn: "ಟೊಮೆಟೊ", ml: "തക്കാളി", hi: "टमाटर" },
+  onion: { kn: "ಈರುಳ್ಳಿ", ml: "സവാള", hi: "प्याज" },
+  potato: { kn: "ಆಲೂಗಡ್ಡೆ", ml: "ഉരുളക്കിഴങ്ങ്", hi: "आलू" },
+  turmeric: { kn: "ಅರಿಶಿನ", ml: "മഞ്ഞൾ", hi: "हल्दी" },
+  chilli: { kn: "ಮೆಣಸಿನಕಾಯಿ", ml: "മുളക്", hi: "मिर्च" },
+  soybean: { kn: "ಸೋಯಾಬೀನ್", ml: "സോയാബീൻ", hi: "सोयाबीन" },
+  groundnut: { kn: "ಕಡಲೆಕಾಯಿ", ml: "നിലക്കടല", hi: "मूंगफली" },
+  sugarcane: { kn: "ಕಬ್ಬು", ml: "കരിമ്പ്", hi: "गन्ना" },
+  cabbage: { kn: "ಎಲೆಕೋಸು", ml: "കാബേജ്", hi: "पत्ता गोभी" },
+  cauliflower: { kn: "ಹೂಕೋಸು", ml: "കോളിഫ്ലവർ", hi: "फूलगोभी" },
+  brinjal: { kn: "ಬದನೆಕಾಯಿ", ml: "വഴുതനങ്ങ", hi: "बैंगन" },
+  okra: { kn: "ಬೆಂಡೆಕಾಯಿ", ml: "വെണ്ടയ്ക്ക", hi: "भिंडी" },
+  carrot: { kn: "ಕ್ಯಾರೆಟ್", ml: "കാരറ്റ്", hi: "गाजर" },
+  mango: { kn: "ಮಾವಿನ ಹಣ್ಣು", ml: "മാമ്പഴം", hi: "आम" },
+  banana: { kn: "ಬಾಳೆಹಣ್ಣು", ml: "വാഴപ്പഴം", hi: "केला" },
+  apple: { kn: "ಸೇಬು", ml: "ആപ്പിൾ", hi: "सेब" },
+  grapes: { kn: "ದ್ರಾಕ್ಷಿ", ml: "മുന്തിരി", hi: "अंगूर" },
+  chickpea: { kn: "ಕಡಲೆ", ml: "കടല", hi: "चना" },
+  pigeonpea: { kn: "ತೊಗರಿ ಬೇಳೆ", ml: "തുവരപ്പരിപ്പ്", hi: "अरहर (तूर)" },
+  moong: { kn: "ಹೆಸರು ಬೇಳೆ", ml: "ചെറുപയർ", hi: "मूंग" },
+  urad: { kn: "ಉದ್ದಿನ ಬೇಳೆ", ml: "ഉഴുന്ന്", hi: "उड़द" },
+  ginger: { kn: "ಶುಂಠಿ", ml: "ഇഞ്ചി", hi: "अदरक" },
+  garlic: { kn: "ಬೆಳ್ಳುಳ್ಳಿ", ml: "വെളുത്തുള്ളി", hi: "लहसुन" }
+};
+
+export function getCropName(crop: Crop, lang: string): string {
+  if (lang === "ta") return crop.nameTA || crop.name;
+  if (lang === "te") return crop.nameTE || crop.name;
+  if (CROP_TRANSLATIONS[crop.id] && CROP_TRANSLATIONS[crop.id][lang as "kn" | "ml" | "hi"]) {
+    return CROP_TRANSLATIONS[crop.id][lang as "kn" | "ml" | "hi"];
+  }
+  return crop.name;
+}
+
+export function getCropDesc(crop: Crop, lang: string): string {
+  if (lang === "ta") return crop.descTA || crop.description;
+  if (lang === "te") return crop.descTE || crop.description;
+  return crop.description;
+}

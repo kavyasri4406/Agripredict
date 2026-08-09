@@ -3,19 +3,20 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { getCurrentUser, logout, updateUserLocation } from "@/lib/auth";
 import { useApp } from "@/lib/AppContext";
+import { APP_TRANSLATIONS } from "@/lib/appTranslations";
 import { INDIAN_STATES, STATE_DISTRICTS } from "@/lib/locationData";
 import type { User } from "@/lib/auth";
 
 const NAV = [
-  { href: "/", icon: "🏠", label: "Dashboard", labelTA: "முகப்பு", labelTE: "డాష్‌బోర్డ్" },
-  { href: "/crops", icon: "🌾", label: "Crops", labelTA: "பயிர்கள்", labelTE: "పంటలు" },
-  { href: "/my-crops", icon: "⭐", label: "My Crops", labelTA: "என் பயிர்கள்", labelTE: "నా పంటలు" },
-  { href: "/analytics", icon: "📊", label: "Analytics", labelTA: "பகுப்பாய்வு", labelTE: "విశ్లేషణలు" },
-  { href: "/schemes", icon: "🏛️", label: "Govt Schemes", labelTA: "அரசு திட்டங்கள்", labelTE: "ప్రభుత్వ పథకాలు" },
-  { href: "/tools", icon: "🛠️", label: "Agri-Tools", labelTA: "விவசாய கருவிகள்", labelTE: "వ్యవసాయ సాధనాలు" },
-  { href: "/chatbot", icon: "🤖", label: "AI Chatbot", labelTA: "AI சாட்", labelTE: "AI చాట్" },
-  { href: "/documents", icon: "📄", label: "Doc Scanner", labelTA: "ஆவண ஸ்கேனர்", labelTE: "డాక్ స్కానర్" },
-  { href: "/settings", icon: "⚙️", label: "Settings", labelTA: "அமைப்புகள்", labelTE: "సెట్టింగులు" },
+  { href: "/", icon: "🏠", label: "Dashboard", labelTA: "முகப்பு", labelTE: "డాష్‌బోర్డ్", labelKN: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್", labelML: "ഡാഷ്‌ബോർഡ്", labelHI: "डैशबोर्ड" },
+  { href: "/crops", icon: "🌾", label: "Crops", labelTA: "பயிர்கள்", labelTE: "పంటలు", labelKN: "ಬೆಳೆಗಳು", labelML: "വിളകൾ", labelHI: "फसलें" },
+  { href: "/my-crops", icon: "⭐", label: "My Crops", labelTA: "என் பயிர்கள்", labelTE: "నా పంటలు", labelKN: "ನನ್ನ ಬೆಳೆಗಳು", labelML: "എന്റെ വിളകൾ", labelHI: "मेरी फसलें" },
+  { href: "/analytics", icon: "📊", label: "Analytics", labelTA: "பகுப்பாய்வு", labelTE: "విశ్లేషణలు", labelKN: "ವಿಶ್ಲೇಷಣೆಗಳು", labelML: "വിശകലനങ്ങൾ", labelHI: "विश्लेषण" },
+  { href: "/schemes", icon: "🏛️", label: "Govt Schemes", labelTA: "அரசு திட்டங்கள்", labelTE: "ప్రభుత్వ పథకాలు", labelKN: "ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು", labelML: "സർക്കാർ പദ്ധതികൾ", labelHI: "सरकारी योजनाएं" },
+  { href: "/tools", icon: "🛠️", label: "Agri-Tools", labelTA: "விவசாய கருவிகள்", labelTE: "వ్యవసాయ సాధనాలు", labelKN: "ಕೃಷಿ ಉಪಕರಣಗಳು", labelML: "കാർഷിക ഉപകരണങ്ങൾ", labelHI: "कृषि उपकरण" },
+  { href: "/chatbot", icon: "🤖", label: "AI Chatbot", labelTA: "AI சாட்", labelTE: "AI చాట్", labelKN: "AI ಚಾಟ್‌ಬಾಟ್", labelML: "AI ചാറ്റ്ബോട്ട്", labelHI: "एआई चैटबॉट" },
+  { href: "/documents", icon: "📄", label: "Doc Scanner", labelTA: "ஆவண ஸ்கேனர்", labelTE: "డాక్ స్కానర్", labelKN: "ದಾಖಲೆ ಸ್ಕ್ಯಾನರ್", labelML: "രേഖ സ്കാനർ", labelHI: "दस्तावेज़ स्कैनर" },
+  { href: "/settings", icon: "⚙️", label: "Settings", labelTA: "அமைப்புகள்", labelTE: "సెట్టింగులు", labelKN: "ಸಂಯೋಜನೆಗಳು", labelML: "ക്രമീകരണങ്ങൾ", labelHI: "सेटिंग्स" },
 ];
 
 
@@ -38,6 +39,7 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { isDark, toggleDark, notifications, markAllRead, markAsRead, clearNotifications, unreadCount, location, setLocation, language, setLanguage } = useApp();
+  const T = APP_TRANSLATIONS[language] || APP_TRANSLATIONS.en;
   const [user, setUser] = useState<User | null>(null);
   const [showNotif, setShowNotif] = useState(false);
 
@@ -55,9 +57,12 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const getLabel = (item: typeof NAV[0]) => {
+  const getLabel = (item: any) => {
     if (language === "ta") return item.labelTA;
     if (language === "te") return item.labelTE;
+    if (language === "kn") return item.labelKN;
+    if (language === "ml") return item.labelML;
+    if (language === "hi") return item.labelHI;
     return item.label;
   };
 
@@ -89,7 +94,7 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
 
       {/* Nav */}
       <nav className="sidebar-nav">
-        <div className="sidebar-section-label">Navigation</div>
+        <div className="sidebar-section-label">{T.navSection}</div>
         {NAV.map(item => (
           <button key={item.href} id={`nav-${item.href.replace("/", "") || "home"}`}
             className={`sidebar-link ${isActive(item.href) ? "active" : ""}`}
@@ -131,7 +136,7 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             onMouseLeave={e => e.currentTarget.style.background = "var(--sidebar-card)"}
           >
             <span>🔔</span>
-            <span>Alert Center</span>
+            <span>{T.alertCenter}</span>
             {unreadCount > 0 && (
               <span style={{
                 background: "#E05252",
@@ -214,6 +219,33 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           )}
         </div>
 
+        {/* Language Selector */}
+        <div style={{ marginBottom: 10 }}>
+          <select
+            value={language}
+            onChange={e => setLanguage(e.target.value as any)}
+            style={{
+              width: "100%",
+              background: "var(--sidebar-card)",
+              border: "none",
+              borderRadius: 10,
+              padding: "9px 12px",
+              color: "var(--sidebar-text)",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: "inherit"
+            }}
+          >
+            <option value="en">English</option>
+            <option value="ta">Tamil (தமிழ்)</option>
+            <option value="te">Telugu (తెలుగు)</option>
+            <option value="kn">Kannada (ಕನ್ನಡ)</option>
+            <option value="ml">Malayalam (മലയാളം)</option>
+            <option value="hi">Hindi (हिंदी)</option>
+          </select>
+        </div>
+
         {/* User login/logout only (no profile display duplicated) */}
         {user ? (
           <button id="btn-logout" style={{
@@ -241,10 +273,10 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
             onMouseEnter={e => e.currentTarget.style.background = "var(--bg-sidebar-hover)"}
             onMouseLeave={e => e.currentTarget.style.background = "var(--sidebar-card)"}
           >
-            <span>🚪</span> Sign Out
+            <span>🚪</span> {T.signOut}
           </button>
         ) : (
-          <button className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }} onClick={() => router.push("/login")}>Sign In</button>
+          <button className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }} onClick={() => router.push("/login")}>{T.signIn}</button>
         )}
       </div>
     </aside>

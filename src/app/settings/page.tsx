@@ -69,6 +69,66 @@ const LABELS = {
     successMsg: "సెట్టింగులు విజయవంతంగా సేవ్ చేయబడ్డాయి! 🟢",
     notLoggedIn: "సెట్టింగులను మార్చడానికి లాగిన్ అవ్వండి",
     signInBtn: "లాగిన్ అవ్వండి",
+  },
+  kn: {
+    title: "ಖಾತೆ ಸಂಯೋಜನೆಗಳು",
+    sub: "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್, ಸ್ಥಳ, ಬೆಳೆ ಆದ್ಯತೆಗಳು ಮತ್ತು ಅಪ್ಲಿಕೇಶನ್ ಆಯ್ಕೆಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ",
+    profileSec: "ಪ್ರೊಫೈಲ್ ಮಾಹಿತಿ",
+    nameLabel: "ನಿಮ್ಮ ಹೆಸರು",
+    roleLabel: "ನಿಮ್ಮ ಪಾತ್ರ",
+    avatarLabel: "ಪ್ರೊಫೈಲ್ ಚಿತ್ರ ಆಯ್ಕೆಮಾಡಿ",
+    locSec: "ಕೃಷಿ ಸ್ಥಳ",
+    stateLabel: "ರಾಜ್ಯ",
+    districtLabel: "ಜಿಲ್ಲೆ",
+    portfolioSec: "ನನ್ನ ಬೆಳೆಗಳ ಪೋರ್ಟ್‌ಫೋಲಿಯೊ",
+    portfolioSub: "ನೀವು ಬೆಳೆಯುವ ಅಥವಾ ಟ್ರ್ಯಾಕ್ ಮಾಡುವ ಬೆಳೆಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    prefSec: "ಅಪ್ಲಿಕೇಶನ್ ಆದ್ಯತೆಗಳು",
+    themeLabel: "ಡಾರ್ಕ್ ಮೋಡ್ ಥೀಮ್",
+    langLabel: "ಅಪ್ಲಿಕೇಶನ್ ಭಾಷೆ",
+    saveBtn: "ಸಂಯೋಜನೆಗಳನ್ನು ಉಳಿಸಿ",
+    successMsg: "ಸಂಯೋಜನೆಗಳನ್ನು ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ! 🟢",
+    notLoggedIn: "ಸಂಯೋಜನೆಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಸೈನ್ ಇನ್ ಮಾಡಿ",
+    signInBtn: "ಸೈನ್ ಇನ್‌ಗೆ ಹೋಗಿ",
+  },
+  ml: {
+    title: "അക്കൗണ്ട് ക്രമീകരണങ്ങൾ",
+    sub: "നിങ്ങളുടെ പ്രൊഫൈൽ, ലൊക്കേഷൻ, വിള മുൻഗണനകൾ എന്നിവ സജ്ജീകരിക്കുക",
+    profileSec: "പ്രൊഫൈൽ വിവരങ്ങൾ",
+    nameLabel: "നിങ്ങളുടെ പേര്",
+    roleLabel: "നിങ്ങളുടെ ചുമതല",
+    avatarLabel: "പ്രൊഫൈൽ ചിത്രം തിരഞ്ഞെടുക്കുക",
+    locSec: "കാർഷിക സ്ഥലം",
+    stateLabel: "സംസ്ഥാനം",
+    districtLabel: "ജില്ല",
+    portfolioSec: "എന്റെ വിളകൾ",
+    portfolioSub: "നിങ്ങൾ കൃഷി ചെയ്യുന്ന വിളകൾ തിരഞ്ഞെടുക്കുക",
+    prefSec: "ആപ്പ് മുൻഗണനകൾ",
+    themeLabel: "ഡാർക്ക് മോഡ്",
+    langLabel: "ആപ്പ് ഭാഷ",
+    saveBtn: "ക്രമീകരണങ്ങൾ സംരക്ഷിക്കുക",
+    successMsg: "ക്രമീകരണങ്ങൾ വിജയം! 🟢",
+    notLoggedIn: "ലോഗിൻ ചെയ്യുക",
+    signInBtn: "ലോഗിൻ",
+  },
+  hi: {
+    title: "खाता सेटिंग्स",
+    sub: "अपनी प्रोफ़ाइल, स्थान, फसल प्राथमिकताओं और ऐप विकल्पों को कॉन्फ़िगर करें",
+    profileSec: "प्रोफ़ाइल जानकारी",
+    nameLabel: "आपका नाम",
+    roleLabel: "आपकी भूमिका",
+    avatarLabel: "प्रोफ़ाइल अवतार चुनें",
+    locSec: "कृषि स्थान",
+    stateLabel: "राज्य",
+    districtLabel: "ज़िला",
+    portfolioSec: "मेरी फसलें पोर्टफोलियो",
+    portfolioSub: "अपनी फसलें चुनें जिन्हें आप ट्रैक करते हैं",
+    prefSec: "ऐप प्राथमिकताएं",
+    themeLabel: "डार्क मोड थीम",
+    langLabel: "सिस्टम भाषा",
+    saveBtn: "सेटिंग्स सहेजें",
+    successMsg: "सेटिंग्स सफलतापूर्वक अपडेट की गईं! 🟢",
+    notLoggedIn: "सेटिंग्स के लिए साइन इन करें",
+    signInBtn: "साइन इन करें",
   }
 };
 
@@ -162,7 +222,7 @@ export default function SettingsPage() {
     }, 1500);
   };
 
-  const L = LABELS[language] || LABELS.en;
+  const L = LABELS[language as keyof typeof LABELS] || LABELS.en;
 
   if (!user) {
     return (
@@ -397,7 +457,7 @@ export default function SettingsPage() {
               </div>
               <div style={{ textAlign: "center" }}>
                 <div style={{ opacity: 0.8, fontSize: 10, textTransform: "uppercase", fontWeight: 700 }}>Language</div>
-                <div style={{ fontWeight: 700, marginTop: 2 }}>{{ en: "English", ta: "Tamil", te: "Telugu" }[language]}</div>
+                <div style={{ fontWeight: 700, marginTop: 2 }}>{{ en: "English", ta: "Tamil", te: "Telugu", kn: "Kannada", ml: "Malayalam", hi: "Hindi" }[language]}</div>
               </div>
             </div>
           </div>
@@ -433,9 +493,12 @@ export default function SettingsPage() {
             <div>
               <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>{L.langLabel}</label>
               <select className="input" style={{ width: "100%" }} value={language} onChange={e => setLanguage(e.target.value as Language)}>
-                <option value="en">English 🇬🇧</option>
-                <option value="ta">தமிழ் 🌸</option>
-                <option value="te">తెలుగు 🌺</option>
+                <option value="en">English</option>
+                <option value="ta">Tamil (தமிழ்)</option>
+                <option value="te">Telugu (తెలుగు)</option>
+                <option value="kn">Kannada (ಕನ್ನಡ)</option>
+                <option value="ml">Malayalam (മലയാളം)</option>
+                <option value="hi">Hindi (हिंदी)</option>
               </select>
             </div>
           </div>

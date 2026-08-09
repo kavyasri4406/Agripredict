@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CROPS, CATEGORIES, SEASONS, formatPrice, getLivePrice } from "@/lib/cropData";
+import { CROPS, CATEGORIES, SEASONS, formatPrice, getLivePrice, getCropName, getCropDesc } from "@/lib/cropData";
 import { getCurrentUser, updatePortfolio } from "@/lib/auth";
 import { useApp } from "@/lib/AppContext";
 import PortfolioPerformanceGraph from "@/components/PortfolioPerformanceGraph";
@@ -60,8 +60,8 @@ export default function MyCropsPage() {
     (c.name.toLowerCase().includes(addSearch.toLowerCase()) || c.nameTA.includes(addSearch) || c.nameTE.includes(addSearch))
   );
 
-  const getName = (c: typeof CROPS[0]) => language === "ta" ? c.nameTA : language === "te" ? c.nameTE : c.name;
-  const getDesc = (c: typeof CROPS[0]) => language === "ta" ? c.descTA : language === "te" ? c.descTE : c.description;
+  const getName = (c: typeof CROPS[0]) => getCropName(c, language);
+  const getDesc = (c: typeof CROPS[0]) => getCropDesc(c, language);
 
   const L = {
     title: language === "ta" ? "என் பயிர்கள்" : language === "te" ? "నా పంటలు" : "My Crops",

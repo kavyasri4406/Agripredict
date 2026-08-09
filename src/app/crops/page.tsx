@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CROPS, CATEGORIES, generatePriceHistory, generateForecast, getRecommendation, formatPrice, getLivePrice } from "@/lib/cropData";
+import { CROPS, CATEGORIES, generatePriceHistory, generateForecast, getRecommendation, formatPrice, getLivePrice, getCropName, getCropDesc } from "@/lib/cropData";
 import { fetchWeather } from "@/lib/weather";
 import { useApp } from "@/lib/AppContext";
+import { APP_TRANSLATIONS } from "@/lib/appTranslations";
 import MandiComparison from "@/components/MandiComparison";
 import type { WeatherData } from "@/lib/weather";
 
@@ -11,6 +12,9 @@ const LABELS = {
   en: { title: "Crops Market", greeting: "Good", morning: "Morning", afternoon: "Afternoon", evening: "Evening", livePrice: "Live Market Prices", weather: "Weather Details", aiRec: "AI Recommendation", action: "BUY", hold: "HOLD", sell: "SELL", viewForecast: "View Forecast", confidence: "Confidence", loading: "Loading..." },
   ta: { title: "பயிர் சந்தை", greeting: "வணக்கம்", morning: "காலை", afternoon: "மதியம்", evening: "மாலை", livePrice: "நேரடி சந்தை விலைகள்", weather: "வானிலை விவரங்கள்", aiRec: "AI பரிந்துரை", action: "வாங்க", hold: "தொடர்க", sell: "விற்க", viewForecast: "கணிப்பு பார்க்க", confidence: "நம்பகத்தன்மை", loading: "ஏற்றுகிறது..." },
   te: { title: "పంటల మార్కెట్", greeting: "నమస్కారం", morning: "ఉదయం", afternoon: "మధ్యాహ్నం", evening: "సాయంత్రం", livePrice: "లైవ్ మార్కెట్ ధరలు", weather: "వాతావరణ వివరాలు", aiRec: "AI సిఫారసు", action: "కొనండి", hold: "ఉంచండి", sell: "అమ్మండి", viewForecast: "అంచనా చూడండి", confidence: "నమ్మకం", loading: "లోడ్ అవుతోంది..." },
+  kn: { title: "ಬೆಳೆ ಮಾರುಕಟ್ಟೆ", greeting: "ನಮಸ್ಕಾರ", morning: "ಬೆಳಿಗ್ಗೆ", afternoon: "ಮಧ್ಯಾಹ್ನ", evening: "ಸಂಜೆ", livePrice: "ಲೈವ್ ಬೆಲೆಗಳು", weather: "ಹವಾಮಾನ ವಿವರಗಳು", aiRec: "AI ಸಲಹೆ", action: "ಖರೀದಿಸಿ", hold: "ಇರಿಸಿಕೊಳ್ಳಿ", sell: "ಮಾರಿ", viewForecast: "ಮುನ್ಸೂಚನೆ", confidence: "ವಿಶ್ವಾಸಾರ್ಹತೆ", loading: "ಲೋಡ್ ಆಗುತ್ತಿದೆ..." },
+  ml: { title: "വിള വിപണി", greeting: "നമസ്കാരം", morning: "പ്രഭാതം", afternoon: "ഉച്ചയ്ക്ക്", evening: "വൈകുന്നേരം", livePrice: "തത്സമയ വിലകൾ", weather: "കാലാവസ്ഥ", aiRec: "AI ഉപദേശം", action: "വാങ്ങുക", hold: "സൂക്ഷിക്കുക", sell: "വിൽക്കുക", viewForecast: "പ്രവചനം", confidence: "വിശ്വാസ്യത", loading: "ലോഡുചെയ്യുന്നു..." },
+  hi: { title: "फसल बाज़ार", greeting: "नमस्ते", morning: "सुबह", afternoon: "दोपहर", evening: "शाम", livePrice: "लाइव बाज़ार दरें", weather: "मौसम विवरण", aiRec: "एआई सिफारिश", action: "खरीदें", hold: "होल्ड करें", sell: "बेचें", viewForecast: "पूर्वानुमान देखें", confidence: "विश्वसनीयता", loading: "लोड हो रहा है..." }
 };
 
 interface LiveCrop { id: string; name: string; emoji: string; image: string; price: number; prevPrice: number; change: number; flash: "up" | "down" | null; }
@@ -18,7 +22,8 @@ interface LiveCrop { id: string; name: string; emoji: string; image: string; pri
 export default function CropsPage() {
   const router = useRouter();
   const { location, language, addNotification } = useApp();
-  const L = LABELS[language as "en" | "ta" | "te"] || LABELS.en;
+  const L = LABELS[language as keyof typeof LABELS] || LABELS.en;
+  const T = APP_TRANSLATIONS[language] || APP_TRANSLATIONS.en;
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [liveCrops, setLiveCrops] = useState<LiveCrop[]>([]);
   const [selectedCrop, setSelectedCrop] = useState(CROPS[0]);
@@ -32,7 +37,10 @@ export default function CropsPage() {
   const getCategoryName = (cat: string) => {
     const tl: any = {
       ta: { "Cereals": "தானியங்கள்", "Vegetables": "காய்கறிகள்", "Fruits": "பழங்கள்", "Oilseeds": "எண்ணெய் வித்துக்கள்", "Pulses": "பருப்பு வகைகள்", "Spices": "மசாலா", "Cash Crops": "பணப்பயிர்கள்" },
-      te: { "Cereals": "ధాన్యాలు", "Vegetables": "కూరగాయలు", "Fruits": "పండ్లు", "Oilseeds": "నూనె గింజలు", "Pulses": "పప్పులు", "Spices": "సుగంధ ద్రవ్యాలు", "Cash Crops": "వాణిజ్య పంటలు" }
+      te: { "Cereals": "ధాన్యాలు", "Vegetables": "కూరగాయలు", "Fruits": "పండ్లు", "Oilseeds": "నూనె గింజలు", "Pulses": "పప్పులు", "Spices": "సుగంధ ద్రవ్యాలు", "Cash Crops": "వాణిజ్య పంటలు" },
+      kn: { "Cereals": "ಧಾನ್ಯಗಳು", "Vegetables": "ತರಕಾರಿಗಳು", "Fruits": "ಹಣ್ಣುಗಳು", "Oilseeds": "ಎಣ್ಣೆಕಾಳುಗಳು", "Pulses": "ಬೇಳೆಕಾಳುಗಳು", "Spices": "ಮಸಾಲೆಗಳು", "Cash Crops": "ವಾಣಿಜ್ಯ ಬೆಳೆಗಳು" },
+      ml: { "Cereals": "ധാന്യങ്ങൾ", "Vegetables": "പച്ചക്കറികൾ", "Fruits": "പഴങ്ങൾ", "Oilseeds": "എണ്ണക്കുരുക്കൾ", "Pulses": "പയറുവർഗ്ഗങ്ങൾ", "Spices": "സുഗന്ധവ്യഞ്ജനങ്ങൾ", "Cash Crops": "നാണ്യവിളകൾ" },
+      hi: { "Cereals": "अनाज", "Vegetables": "सब्जियां", "Fruits": "फल", "Oilseeds": "तिलहन", "Pulses": "दालें", "Spices": "मसाले", "Cash Crops": "नकदी फसलें" }
     };
     return (tl[language] && tl[language][cat]) || cat;
   };
@@ -182,9 +190,9 @@ export default function CropsPage() {
             {/* Top stats */}
         <div className="grid-cols-4-responsive" style={{ gap: 14, marginBottom: 22 }}>
           {[
-            { icon: "🌾", label: language === "ta" ? "மொத்த பயிர்கள்" : language === "te" ? "మొత్తం పంటలు" : "Total Crops", value: CROPS.length, sub: "Tracked nationwide" },
+            { icon: "🌾", label: language === "ta" ? "மொத்த பயிர்கள்" : language === "te" ? "మొత్తం పంటలు" : "Total Crops", value: CROPS.length, sub: "{T.trackedNationwide}" },
             { icon: "💰", label: language === "ta" ? "தற்போதைய விலை" : language === "te" ? "ప్రస్తుత ధర" : "Current Price", value: formatPrice(liveCrops.find(l => l.id === selectedCrop.id)?.price || selectedCrop.basePrice), sub: `${language === "ta" ? selectedCrop.nameTA : language === "te" ? selectedCrop.nameTE : selectedCrop.name} / ${selectedCrop.unit}${selectedCrop.unit === "quintal" ? ` (${formatPrice((liveCrops.find(l => l.id === selectedCrop.id)?.price || selectedCrop.basePrice) / 100)}/kg)` : ""}` },
-            { icon: "📈", label: language === "ta" ? "MSP விலை" : language === "te" ? "MSP ధర" : "MSP Price", value: selectedCrop.msp > 0 ? formatPrice(selectedCrop.msp) : "—", sub: selectedCrop.msp > 0 ? "Govt minimum" : "No MSP" },
+            { icon: "📈", label: language === "ta" ? "MSP விலை" : language === "te" ? "MSP ధర" : "MSP Price", value: selectedCrop.msp > 0 ? formatPrice(selectedCrop.msp) : "—", sub: selectedCrop.msp > 0 ? "{T.govtMinimum}" : "No MSP" },
             { icon: "🌦️", label: language === "ta" ? "வானிலை" : language === "te" ? "వాతావరణం" : "Weather", value: weather ? `${weather.temperature}°C` : "—", sub: weather?.condition || location.district },
           ].map(stat => (
             <div key={stat.label} className="stat-card">
@@ -231,13 +239,13 @@ export default function CropsPage() {
                 </div>
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   <div className="card-sm" style={{ flex: 1, minWidth: 100, textAlign: "center", background: recommendation.priceChange > 0 ? "#F0FDF4" : "#FFF1F2", border: `1px solid ${recommendation.priceChange > 0 ? "#BBF7D0" : "#FECDD3"}` }}>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>30-Day Forecast</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{T.forecast30Day}</div>
                     <div style={{ fontSize: 18, fontWeight: 800, color: recommendation.priceChange > 0 ? "#15803D" : "#B91C1C" }}>
                       {recommendation.priceChange > 0 ? "↑" : "↓"} {Math.abs(recommendation.priceChange).toFixed(1)}%
                     </div>
                   </div>
                   <div className="card-sm" style={{ flex: 1, minWidth: 100, textAlign: "center" }}>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Crop Impact</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{T.cropImpact}</div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: weather?.cropImpact === "High" ? "#B91C1C" : weather?.cropImpact === "Medium" ? "#92400E" : "#15803D" }}>
                       {weather?.cropImpact || "Low"} Risk
                     </div>
@@ -271,9 +279,9 @@ export default function CropsPage() {
                 </div>
                 <div className="grid-cols-2-responsive" style={{ gap: 10, marginTop: 16, position: "relative", zIndex: 1 }}>
                   {[
-                    { label: "Humidity", value: `${weather.humidity}%` },
+                    { label: "{T.humidity}", value: `${weather.humidity}%` },
                     { label: "Wind", value: `${weather.windspeed} km/h` },
-                    { label: "Crop Risk", value: weather.cropImpact },
+                    { label: "{T.weatherRisk}", value: weather.cropImpact },
                     { label: "Soil Moisture", value: `${weather.soilMoistureIndex}%` },
                   ].map(item => (
                     <div key={item.label} style={{ background: "rgba(255,255,255,0.1)", borderRadius: 10, padding: "8px 12px" }}>

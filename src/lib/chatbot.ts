@@ -1,4 +1,4 @@
-export type Language = "en" | "ta" | "te";
+export type Language = "en" | "ta" | "te" | "kn" | "ml" | "hi";
 
 export interface ChatMessage {
   id: string;
@@ -9,15 +9,19 @@ export interface ChatMessage {
 
 // ── Language detection ─────────────────────────────────
 export function detectLanguage(text: string): Language {
-  // Tamil Unicode range: U+0B80–U+0BFF
   if (/[\u0B80-\u0BFF]/.test(text)) return "ta";
-  // Telugu Unicode range: U+0C00–U+0C7F
   if (/[\u0C00-\u0C7F]/.test(text)) return "te";
+  if (/[\u0C80-\u0CFF]/.test(text)) return "kn";
+  if (/[\u0D00-\u0D7F]/.test(text)) return "ml";
+  if (/[\u0900-\u097F]/.test(text)) return "hi";
   return "en";
 }
 
 // ── Response databases ─────────────────────────────────
 const responses: Record<Language, Record<string, string>> = {
+  kn: {},
+  ml: {},
+  hi: {},
   en: {
     mango_fly: "🥭 **Mango Fruit Fly & Worm Management:**\n• **Symptoms:** Maggots feeding inside small/ripe mangoes causing rot and premature drop.\n• **Organic Control:** Install methyl eugenol pheromone traps (10/acre). Collect and destroy fallen fruits daily. Spray Neem Oil 3%.\n• **Chemical Control:** Spray Malathion @ 2ml/L or apply bait spray with jaggery + Malathion.",
     nellore_mandi: "🚛 **Nellore Mandi Price Drop Advisory:**\n• **Risk:** High moisture levels (due to coastal rains/cyclones) cause up to 15-20% price depreciation at Nellore Mandi.\n• **Mitigation:** Dry grains below 12% moisture. Store in certified warehouses under PM-Warehouse scheme, or use e-NAM portal to compare and trade directly with Guntur Mandi (+10% price premium) or Chennai Koyambedu.",
@@ -88,7 +92,7 @@ const pestKeywords = [
   "பூச்சி", "நோய்", "கட்டுப்பாடு", "தடுப்பு"
 ];
 
-const pestDatabase: Record<string, Record<Language, string>> = {
+const pestDatabase: Record<string, Partial<Record<Language, string>>> = {
   rice: {
     en: "🌾 **Rice Pest & Disease Management:**\n• **Major Pests:** Brown Plant Hopper (BPH), Stem Borer.\n• **Major Diseases:** Rice Blast, Sheath Blight.\n• **Precautionary Measures:** Use disease-resistant varieties, maintain proper spacing, avoid excess nitrogen fertilizers. For Blast, spray Tricyclazole @ 0.6g/L.",
     ta: "🌾 **நெல் பூச்சி மற்றும் நோய் மேலாண்மை:**\n• **முக்கிய பூச்சிகள்:** குருத்துப்பூச்சி, புகையான்.\n• **முக்கிய நோய்கள்:** குலை நோய், இலைக்கருகல் நோய்.\n• **முன்னெச்சரிக்கை நடவடிக்கைகள்:** நோய் எதிர்ப்பு ரகங்களை பயன்படுத்தவும், நைதரசன் உரங்களை அளவாக இடவும். குலை நோய்க்கு Tricyclazole தெளிக்கவும்.",
@@ -270,11 +274,14 @@ function findResponse(query: string, lang: Language): string {
   }
 
   const fallbacks: Record<Language, string> = {
-    en: "That's a great question! 🌾 I'd recommend:\n• Checking the Analytics page for price trends\n• Visiting the Forecast page for your specific crop\n• Viewing the Dashboard for live market prices\n\nTry asking about specific crops like rice, wheat, tomato, or ask about MSP prices!",
-    ta: "நல்ல கேள்வி! 🌾 நான் பரிந்துரைக்கிறேன்:\n• விலை போக்குகளுக்கு Analytics பக்கத்தை பார்க்கவும்\n• உங்கள் பயிரின் கணிப்பு பக்கத்தை பார்க்கவும்\n• நேரடி சந்தை விலைகளுக்கு Dashboard-ஐ பார்க்கவும்\n\nதமிழிலேயே கேளுங்கள்! 😊",
-    te: "మంచి ప్రశ్న! 🌾 నేను సూచిస్తాను:\n• ధర ధోరణులకు Analytics పేజీని చూడండి\n• మీ పంట అంచనా పేజీని చూడండి\n• లైవ్ మార్కెట్ ధరలకు Dashboard చూడండి\n\nతెలుగులో అడగండి! 😊",
+    en: "That's a great question! 🌾 I'd recommend checking Analytics or Dashboard for live price trends and weather forecasts.",
+    ta: "நல்ல கேள்வி! 🌾 விலை போக்குகளுக்கு Analytics பக்கத்தை பார்க்கவும்.",
+    te: "మంచి ప్రశ్న! 🌾 ధర ధోరణులకు Analytics పేజీని చూడండి.",
+    kn: "ಉತ್ತಮ ಪ್ರಶ್ನೆ! 🌾 ಬೆಲೆ ಟ್ರೆಂಡ್‌ಗಳಿಗಾಗಿ Analytics ನೋಡಿ.",
+    ml: "നല്ല ചോദ്യം! 🌾 തത്സമയ വിലകൾക്കായി Analytics പരിശോധിക്കുക.",
+    hi: "अच्छा सवाल है! 🌾 लाइव कीमतों के लिए Analytics देखें।"
   };
-  return fallbacks[lang];
+  return fallbacks[lang] || fallbacks.en;
 }
 
 export function getChatbotResponse(message: string, forceLang?: Language): string {
@@ -290,10 +297,16 @@ export const QUICK_PROMPTS: Record<Language, string[]> = {
   en: ["What crops to sell now?", "MSP prices list", "Organic control for mango worms", "Nellore Mandi price drop risk", "Government schemes for farmers"],
   ta: ["இப்போது என்ன விற்பது?", "MSP விலை பட்டியல்", "மாம்பழ புழுக்களுக்கு இயற்கை நிவராணம்", "நெல்லூர் மண்டி விலை வீழ்ச்சி அபாயம்", "வானிலை தாக்கம்"],
   te: ["ఇప్పుడు ఏమి అమ్మాలి?", "MSP ధరల జాబితా", "మామిడి పండు ఈగ నివారణ చర్యలు", "నెల్లూరు మండి ధరల తగ్గుదల ప్రమాదం", "వాతావరణ ప్రభావం"],
+  kn: ["ಈಗ ಏನು ಮಾರಾಟ ಮಾಡಬೇಕು?", "MSP ಬೆಲೆ ಪಟ್ಟಿ", "ಮಾವಿನ ಹುಳು ನಿಯಂತ್ರಣ", "ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು"],
+  ml: ["ഇപ്പോൾ ഏത് വിളകൾ വിൽക്കണം?", "MSP വില വിവരങ്ങൾ", "കീട നിയന്ത്രണം", "സർക്കാർ പദ്ധതികൾ"],
+  hi: ["अब कौन सी फसल बेचें?", "एमएसपी मूल्य सूची", "कीट नियंत्रण उपाय", "सरकारी योजनाएं"]
 };
 
 export const LANG_LABELS: Record<Language, string> = {
-  en: "English 🇬🇧",
-  ta: "தமிழ் 🌸",
-  te: "తెలుగు 🌺",
+  en: "English",
+  ta: "Tamil (தமிழ்)",
+  te: "Telugu (తెలుగు)",
+  kn: "Kannada (ಕನ್ನಡ)",
+  ml: "Malayalam (മലയാളം)",
+  hi: "Hindi (हिंदी)"
 };

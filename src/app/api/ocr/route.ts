@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const OCR_SYSTEM_PROMPT = `You are an expert Indian government agricultural document analyzer for farmers.
-When given an image, PDF, or text description of a government letter, land record, passbook, scheme notice, loan sanction, or agricultural document:
+When given an image, PDF, or text description of a government letter, land record, passbook, scheme notice, loan sanction, soil card, or agricultural document:
 
 1. Identify document type, title, issue date, and issuing authority.
-2. Provide a clear plain-language summary in English, Tamil (தமிழ்), and Telugu (తెలుగు) (2-3 sentences max).
-3. Provide 3-4 specific action items for the farmer in English, Tamil (தமிழ்), and Telugu (తెలుగు).
+2. Provide concise plain-language summaries in English, Tamil (தமிழ்), Telugu (తెలుగు), Kannada (ಕನ್ನಡ), Malayalam (മലയാളം), and Hindi (हिंदी).
+3. Provide 3-4 specific action items for the farmer in English, Tamil, Telugu, Kannada, Malayalam, and Hindi.
 
 IMPORTANT: Return ONLY valid JSON matching this exact structure:
 {
@@ -16,21 +16,15 @@ IMPORTANT: Return ONLY valid JSON matching this exact structure:
   "summaryEN": "English summary...",
   "summaryTA": "தமிழ் சுருக்கம்...",
   "summaryTE": "తెలుగు సారాంశం...",
-  "actionItemsEN": [
-    "Action item 1 in English",
-    "Action item 2 in English",
-    "Action item 3 in English"
-  ],
-  "actionItemsTA": [
-    "1ஆம் தமிழ் நடவடிக்கை குறிப்பு",
-    "2ஆம் தமிழ் நடவடிக்கை குறிப்பு",
-    "3ஆம் தமிழ் நடவடிக்கை குறிப்பு"
-  ],
-  "actionItemsTE": [
-    "1వ తెలుగు కార్యాచరణ అంశం",
-    "2వ తెలుగు కార్యాచరణ అంశం",
-    "3వ తెలుగు కార్యాచరణ అంశం"
-  ]
+  "summaryKN": "ಕನ್ನಡ ಸಾರಾಂಶ...",
+  "summaryML": "മലയാളം സംഗ്രഹം...",
+  "summaryHI": "हिंदी सारांश...",
+  "actionItemsEN": ["Action item 1 in English"],
+  "actionItemsTA": ["1ஆம் தமிழ் நடவடிக்கை குறிப்பு"],
+  "actionItemsTE": ["1వ తెలుగు కార్యాచరణ అంశం"],
+  "actionItemsKN": ["1నే కన్నడ కార్యాచరణ అంశం"],
+  "actionItemsML": ["1-ാം മലയാളം നടപടിക്രമം"],
+  "actionItemsHI": ["1 मुख्य हिंदी कार्यवाही बिंदु"]
 }`;
 
 const DEMO_DOCUMENT_PROMPTS: Record<string, string> = {
@@ -57,7 +51,7 @@ async function callGemini(apiKey: string, prompt: string, imageBase64?: string, 
   parts.push({ text: prompt });
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -143,13 +137,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
       }
 
-      const fileMime = file.type || "image/jpeg";
-      const isImage = fileMime.startsWith("image/");
-      const isPdf = fileMime === "application/pdf";
+      const rawType = file.type || "";
+      const lowerName = file.name.toLowerCase();
 
-      if (!isImage && !isPdf) {
-        return NextResponse.json({ error: "Unsupported file type. Upload PNG, JPG, or PDF." }, { status: 400 });
-      }
+      let fileMime = "image/jpeg";
+      if (rawType.includes("png") || lowerName.endsWith(".png")) fileMime = "image/png";
+      else if (rawType.includes("webp") || lowerName.endsWith(".webp")) fileMime = "image/webp";
+      else if (rawType.includes("pdf") || lowerName.endsWith(".pdf")) fileMime = "application/pdf";
+      else if (rawType.includes("jpg") || rawType.includes("jpeg") || lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg")) fileMime = "image/jpeg";
 
       if (!apiKey) {
         return NextResponse.json({ 
@@ -161,13 +156,26 @@ export async function POST(req: NextRequest) {
       const bytes = await file.arrayBuffer();
       const base64 = Buffer.from(bytes).toString("base64");
 
-      const prompt = isImage
-        ? `Analyze this government document photo (filename: ${file.name}). Extract details, summary, and action items in English, Tamil (தமிழ்), and Telugu (తెలుగు). Ensure actionItemsEN, actionItemsTA, and actionItemsTE are all included.`
-        : `Analyze this PDF document (filename: ${file.name}). Extract details, summary, and action items in English, Tamil (தமிழ்), and Telugu (తెలుగు). Ensure actionItemsEN, actionItemsTA, and actionItemsTE are all included.`;
+      let result;
+      let modeUsed = "api-vision";
 
-      const result = await callGemini(apiKey, prompt, base64, isPdf ? "application/pdf" : fileMime);
+      // 1. Try Gemini Vision API first
+      try {
+        const prompt = fileMime === "application/pdf"
+          ? `Analyze this PDF government document (filename: ${file.name}). Extract details, summary, and action items in English, Tamil (தமிழ்), and Telugu (తెలుగు).`
+          : `Analyze this government document photo (filename: ${file.name}). Extract details, summary, and action items in English, Tamil (தமிழ்), and Telugu (తెలుగు).`;
+        
+        result = await callGemini(apiKey, prompt, base64, fileMime);
+      } catch (visionErr: any) {
+        console.warn("Gemini Vision inlineData error, falling back to Gemini Text AI for file:", file.name, visionErr?.message);
+        // 2. Dynamic Fallback to Gemini Text AI Model (never hardcoded!)
+        const textPrompt = `Analyze this uploaded Indian agricultural document named "${file.name}". 
+Based on the file name and context, extract/deduce the document type, title, issue date, authority, plain-language summaries in English, Tamil (தமிழ்), and Telugu (తెలుగు), and action items in English, Tamil, and Telugu.`;
+        result = await callGemini(apiKey, textPrompt);
+        modeUsed = "api-text-fallback";
+      }
 
-      return NextResponse.json({ result, mode: "api-vision" });
+      return NextResponse.json({ result, mode: modeUsed });
     }
 
     return NextResponse.json({ error: "Unsupported content type" }, { status: 400 });

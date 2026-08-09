@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from "react";
 import { STATE_DISTRICTS } from "@/lib/locationData";
 
-export type Language = "en" | "ta" | "te";
+export type Language = "en" | "ta" | "te" | "kn" | "ml" | "hi";
 
 export interface Notification {
   id: string;

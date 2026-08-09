@@ -10,13 +10,19 @@ interface OcrResult {
   summaryEN: string;
   summaryTA: string;
   summaryTE: string;
+  summaryKN?: string;
+  summaryML?: string;
+  summaryHI?: string;
   actionItemsEN?: string[];
   actionItemsTA?: string[];
   actionItemsTE?: string[];
+  actionItemsKN?: string[];
+  actionItemsML?: string[];
+  actionItemsHI?: string[];
   actionItems?: string[];
 }
 
-type ScanLang = "en" | "ta" | "te";
+type ScanLang = "en" | "ta" | "te" | "kn" | "ml" | "hi";
 
 const DEMO_DOCS = [
   { label: "🏛️ PM-KISAN / e-KYC", key: "pm-kisan", file: "PM-KISAN_eKYC_Notice.pdf" },
@@ -95,9 +101,8 @@ export default function DocumentOcr() {
     setScanMode("idle");
 
     try {
-      const processedFile = await compressImageIfNeeded(file);
       const formData = new FormData();
-      formData.append("file", processedFile);
+      formData.append("file", file);
 
       const res = await fetch("/api/ocr", {
         method: "POST",
@@ -240,22 +245,20 @@ export default function DocumentOcr() {
 
   const getActionItems = (): string[] => {
     if (!ocrResult) return [];
-    if (summaryLang === "ta") {
-      return (ocrResult.actionItemsTA && ocrResult.actionItemsTA.length > 0)
-        ? ocrResult.actionItemsTA
-        : ocrResult.actionItemsEN || ocrResult.actionItems || [];
-    }
-    if (summaryLang === "te") {
-      return (ocrResult.actionItemsTE && ocrResult.actionItemsTE.length > 0)
-        ? ocrResult.actionItemsTE
-        : ocrResult.actionItemsEN || ocrResult.actionItems || [];
-    }
+    if (summaryLang === "ta") return (ocrResult.actionItemsTA && ocrResult.actionItemsTA.length > 0) ? ocrResult.actionItemsTA : ocrResult.actionItemsEN || ocrResult.actionItems || [];
+    if (summaryLang === "te") return (ocrResult.actionItemsTE && ocrResult.actionItemsTE.length > 0) ? ocrResult.actionItemsTE : ocrResult.actionItemsEN || ocrResult.actionItems || [];
+    if (summaryLang === "kn") return (ocrResult.actionItemsKN && ocrResult.actionItemsKN.length > 0) ? ocrResult.actionItemsKN : ocrResult.actionItemsEN || ocrResult.actionItems || [];
+    if (summaryLang === "ml") return (ocrResult.actionItemsML && ocrResult.actionItemsML.length > 0) ? ocrResult.actionItemsML : ocrResult.actionItemsEN || ocrResult.actionItems || [];
+    if (summaryLang === "hi") return (ocrResult.actionItemsHI && ocrResult.actionItemsHI.length > 0) ? ocrResult.actionItemsHI : ocrResult.actionItemsEN || ocrResult.actionItems || [];
     return ocrResult.actionItemsEN || ocrResult.actionItems || [];
   };
 
   const getActionHeader = (): string => {
     if (summaryLang === "ta") return "✅ விவசாயிக்கான முக்கிய நடவடிக்கைகள் (தமிழ்)";
     if (summaryLang === "te") return "✅ రైతు కొరకు చర్యలు (తెలుగు)";
+    if (summaryLang === "kn") return "✅ ರೈತರಿಗಾಗಿ ಪ್ರಮುಖ ಕ್ರಮಗಳು (ಕನ್ನಡ)";
+    if (summaryLang === "ml") return "✅ കർഷകർക്കുള്ള പ്രധാന നടപടികൾ (മലയാളം)";
+    if (summaryLang === "hi") return "✅ किसान के लिए मुख्य कार्य (हिंदी)";
     return "✅ Action Items for Farmer (English)";
   };
 
@@ -412,6 +415,9 @@ export default function DocumentOcr() {
                   { key: "en" as ScanLang, label: "English" },
                   { key: "ta" as ScanLang, label: "தமிழ்" },
                   { key: "te" as ScanLang, label: "తెలుగు" },
+                  { key: "kn" as ScanLang, label: "ಕನ್ನಡ" },
+                  { key: "ml" as ScanLang, label: "മലയാളം" },
+                  { key: "hi" as ScanLang, label: "हिंदी" },
                 ]).map(lang => (
                   <button key={lang.key} onClick={() => setSummaryLang(lang.key)} style={{
                     padding: "4px 12px", borderRadius: 6, border: "none",
@@ -453,7 +459,7 @@ export default function DocumentOcr() {
               background: "var(--bg-card)", padding: 14, borderRadius: 10,
               border: "1px solid var(--border)"
             }}>
-              {summaryLang === "ta" ? ocrResult.summaryTA : summaryLang === "te" ? ocrResult.summaryTE : ocrResult.summaryEN}
+              {summaryLang === "ta" ? ocrResult.summaryTA : summaryLang === "te" ? ocrResult.summaryTE : summaryLang === "kn" ? (ocrResult.summaryKN || ocrResult.summaryEN) : summaryLang === "ml" ? (ocrResult.summaryML || ocrResult.summaryEN) : summaryLang === "hi" ? (ocrResult.summaryHI || ocrResult.summaryEN) : ocrResult.summaryEN}
             </div>
           </div>
 

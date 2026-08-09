@@ -5,10 +5,13 @@ import { useApp } from "@/lib/AppContext";
 import type { ChatMessage, Language } from "@/lib/chatbot";
 import DocumentOcr from "@/components/DocumentOcr";
 
-const WELCOME: Record<Language, string> = {
-  en: "👋 Hello! I'm AgriBot 🌱\n\nI'm your AI agriculture assistant. I can help you with:\n• 🌾 Crop-specific advice\n• 💰 Price predictions & MSP info\n• 🌦️ Weather impacts on crops\n• 🏛️ Government schemes\n• 📊 Market timing advice\n\nYou can type in **English**, **Tamil (தமிழ்)**, or **Telugu (తెలుగు)**!",
-  ta: "👋 வணக்கம்! நான் AgriBot 🌱\n\nநான் உங்கள் AI விவசாய உதவியாளர். நான் இவற்றில் உதவ முடியும்:\n• 🌾 பயிர் குறிப்பிட்ட ஆலோசனை\n• 💰 விலை கணிப்புகள் & MSP தகவல்\n• 🌦️ பயிர்களில் வானிலை தாக்கம்\n• 🏛️ அரசு திட்டங்கள்\n• 📊 சந்தை நேர ஆலோசனை\n\nதமிழிலேயே கேளுங்கள்! 😊",
-  te: "👋 నమస్కారం! నేను AgriBot 🌱\n\nనేను మీ AI వ్యవసాయ సహాయకుడను. నేను ఇవి సహాయపడగలను:\n• 🌾 పంట నిర్దిష్ట సలహా\n• 💰 ధర అంచనాలు & MSP సమాచారం\n• 🌦️ పంటలపై వాతావరణ ప్రభావం\n• 🏛️ ప్రభుత్వ పథకాలు\n• 📊 మార్కెట్ సమయ సలహా\n\nతెలుగులో అడగండి! 😊",
+const WELCOME: Partial<Record<Language, string>> = {
+  en: "👋 Hello! I'm AgriBot 🌱\n\nI'm your AI agriculture assistant. Ask me about crop choices, market prices, weather impacts, or government schemes in English, Tamil, Telugu, Kannada, Malayalam, or Hindi!",
+  ta: "👋 வணக்கம்! நான் AgriBot 🌱\n\nஉங்கள் அனைத்து பயிர் மற்றும் சந்தை கேள்விகளுக்கும் உதவ இங்கே இருக்கிறேன். தமிழிலேயே கேளுங்கள்!",
+  te: "👋 నమస్కారం! నేను AgriBot 🌱\n\nమీ అన్ని పంట మరియు మార్కెట్ ప్రశ్నలకు సహాయపడటానికి ఇక్కడ ఉన్నాను. తెలుగులో అడగండి!",
+  kn: "👋 నమస్కార! నేను AgriBot 🌱\n\nನಿಮ್ಮ ಎಲ್ಲಾ ಬೆಳೆ ಮತ್ತು ಮಾರುಕಟ್ಟೆ ಪ್ರಶ್ನೆಗಳಿಗೆ ಸಹಾಯ ಮಾಡಲು ಇಲ್ಲಿದ್ದೇನೆ. ಕನ್ನಡದಲ್ಲೇ ಕೇಳಿ!",
+  ml: "👋 നമസ്കാരം! ഞാൻ AgriBot 🌱\n\nനിങ്ങളുടെ എല്ലാ കാർഷിക സംശയങ്ങൾക്കും സഹായിക്കാൻ ഞാൻ ഇവിടെയുണ്ട്. മലയാളത്തിൽ ചോദിക്കൂ!",
+  hi: "👋 नमस्कार! मैं AgriBot हूँ 🌱\n\nआपकी सभी फसल और बाजार संबंधी प्रश्नों में मदद के लिए यहाँ हूँ। हिंदी में पूछें!"
 };
 
 interface SavedChatSession {
@@ -23,7 +26,7 @@ type PageMode = "chat" | "documents";
 export default function ChatbotPage() {
   const { language, setLanguage } = useApp();
   const [mode, setMode] = useState<PageMode>("chat");
-  const [messages, setMessages] = useState<ChatMessage[]>([createMessage("assistant", WELCOME[language])]);
+  const [messages, setMessages] = useState<ChatMessage[]>([createMessage("assistant", WELCOME[language] || WELCOME.en || "")]);
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
   const hasProcessedRef = useRef(false);
@@ -112,7 +115,7 @@ export default function ChatbotPage() {
       rec.continuous = false;
       rec.interimResults = false;
       rec.maxAlternatives = 1;
-      rec.lang = { en: "en-IN", ta: "ta-IN", te: "te-IN" }[selectedLang] || "en-IN";
+      rec.lang = { en: "en-IN", ta: "ta-IN", te: "te-IN", kn: "kn-IN", ml: "ml-IN", hi: "hi-IN" }[selectedLang] || "en-IN";
       hasProcessedRef.current = false;
       rec.onstart = () => { setIsRecording(true); };
       rec.onresult = (event: any) => {
@@ -144,7 +147,7 @@ export default function ChatbotPage() {
   const changeLang = (lang: Language) => {
     setSelectedLang(lang);
     setLanguage(lang);
-    setMessages([createMessage("assistant", WELCOME[lang])]);
+    setMessages([createMessage("assistant", WELCOME[lang] || WELCOME.en || "")]);
   };
 
   const send = async (text: string) => {
@@ -291,7 +294,7 @@ export default function ChatbotPage() {
                   💾{savedSessions.length > 0 ? ` (${savedSessions.length})` : ""}
                 </button>
                 <button className="btn btn-primary btn-sm" onClick={saveCurrentSession}>Save</button>
-                <button id="btn-clear-chat" className="btn btn-secondary btn-sm" onClick={() => setMessages([createMessage("assistant", WELCOME[selectedLang])])}>{L.clear}</button>
+                <button id="btn-clear-chat" className="btn btn-secondary btn-sm" onClick={() => setMessages([createMessage("assistant", WELCOME[selectedLang] || WELCOME.en || "")])}>{L.clear}</button>
               </div>
             </div>
 

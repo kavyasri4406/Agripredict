@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getChatbotResponse, type Language } from "@/lib/chatbot";
 
 const SYSTEM_PROMPT = `You are AgriBot 🌱, an expert AI agriculture assistant helping Indian farmers.
-You must speak in the language the user addresses you in: English, Tamil (தமிழ்), or Telugu (తెలుగు).
+You must speak in the language the user addresses you in: English, Tamil (தமிழ்), Telugu (తెలుగు), Kannada (ಕನ್ನಡ), Malayalam (മലയാളം), or Hindi (हिंदी).
+If the farmer types in transliterated scripts like Tanglish, Teluglish, Kanglish, or Hinglish (e.g. "paddy rate eshtu ide?", "vana kalam lo e panta vesukovali?"), understand their query naturally and reply in their preferred language!
 Provide expert advice about crop choices, schedules, organic/chemical pest and disease management, weather risk mitigation, market prices, MSP, and government schemes.
 Make your responses highly structured, premium, and easy to read. Use bullet points and bold formatting where appropriate.
 Keep answers concise, actionable, and focused on practical farming solutions. If a user asks about a crop, provide clear recommendations tailored to their context.`;
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
       }
     ];
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
 
     const response = await fetch(geminiUrl, {
       method: "POST",
