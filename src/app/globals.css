@@ -495,3 +495,133 @@ tr:hover td { background: var(--accent); }
 @media (max-width: 768px) {
   .mobile-header { display: flex !important; }
 }
+
+
+/* ── Additional Mobile & Desktop Responsive Grids & Safety ──────── */
+img, video, iframe, canvas, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.card, .stat-card, .crop-card, .notif-panel, .login-card {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.scrollable-chips-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+}
+.scrollable-chips-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.grid-cols-3-responsive {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+@media (max-width: 992px) {
+  .grid-cols-3-responsive {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .grid-cols-3-responsive {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Ultimate Mobile & Laptop Responsive Frame Controls ──────── */
+.responsive-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.responsive-select-dropdown {
+  width: auto;
+  min-width: 180px;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .responsive-header-controls {
+    width: 100%;
+    margin-top: 10px;
+  }
+  .responsive-select-dropdown {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+  .stat-card {
+    padding: 14px;
+  }
+  .weather-temp {
+    font-size: 38px;
+  }
+}
+
+/* ── Perfect Frame & Layout Rules ──────── */
+.main-layout {
+  margin-left: var(--sidebar-width);
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: calc(100% - var(--sidebar-width));
+  max-width: 100%;
+}
+
+.page-header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.page-content {
+  padding: 24px;
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.responsive-select-dropdown {
+  max-width: 220px !important;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .main-layout {
+    margin-left: 0;
+    width: 100%;
+  }
+}

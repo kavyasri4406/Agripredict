@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CROPS, CATEGORIES, generatePriceHistory, generateForecast, getRecommendation, formatPrice, getLivePrice, getCropName, getCropDesc } from "@/lib/cropData";
+import { CROPS, CATEGORIES, generatePriceHistory, generateForecast, getRecommendation, formatPrice, getLivePrice, getCropName, getCropDesc, getVarietyName, getVarietyDesc } from "@/lib/cropData";
 import { fetchWeather } from "@/lib/weather";
 import { useApp } from "@/lib/AppContext";
 import { APP_TRANSLATIONS } from "@/lib/appTranslations";
@@ -21,18 +21,19 @@ interface LiveCrop { id: string; name: string; emoji: string; image: string; pri
 
 export default function CropsPage() {
   const router = useRouter();
-  const { location, language, addNotification } = useApp();
+  const { location, language } = useApp();
   const L = LABELS[language as keyof typeof LABELS] || LABELS.en;
   const T = APP_TRANSLATIONS[language] || APP_TRANSLATIONS.en;
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [liveCrops, setLiveCrops] = useState<LiveCrop[]>([]);
   const [selectedCrop, setSelectedCrop] = useState(CROPS[0]);
+  const [selectedVariety, setSelectedVariety] = useState<any | null>(null);
   const [recommendation, setRecommendation] = useState<ReturnType<typeof getRecommendation> | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
   const [tick, setTick] = useState(0);
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "mandi">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "mandi" | "varieties">("grid");
 
   const getCategoryName = (cat: string) => {
     const tl: any = {
@@ -64,27 +65,13 @@ export default function CropsPage() {
           return { ...lc, prevPrice: lc.price, price: newPrice, change: changePercent, flash };
         });
 
-        // Trigger notifications asynchronously for major swings (> 3.5%)
-        nextCrops.forEach(lc => {
-          if (Math.abs(lc.change) > 3.5) {
-            const crop = CROPS.find(c => c.id === lc.id)!;
-            setTimeout(() => {
-              addNotification({
-                title: `${crop.emoji} ${crop.name} Price Alert`,
-                message: `${crop.name} ${lc.change > 0 ? "↑" : "↓"} ${Math.abs(lc.change).toFixed(1)}% — Now ${formatPrice(lc.price)}/qntl`,
-                type: "price"
-              });
-            }, 0);
-          }
-        });
-
         return nextCrops;
       });
       setTick(t => t + 1);
       setTimeout(() => setLiveCrops(prev => prev.map(lc => ({ ...lc, flash: null }))), 700);
     }, 12000);
     return () => clearInterval(interval);
-  }, [addNotification]);
+  }, []);
 
   // Fetch weather
   useEffect(() => {
@@ -163,14 +150,37 @@ export default function CropsPage() {
             >
               🏢 Mandi Comparison
             </button>
+            <button
+              id="tab-crop-varieties"
+              onClick={() => setViewMode("varieties")}
+              style={{
+                padding: "5px 12px",
+                borderRadius: 8,
+                border: "none",
+                background: viewMode === "varieties" ? "var(--primary)" : "transparent",
+                color: viewMode === "varieties" ? "#fff" : "var(--text-muted)",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 4
+              }}
+            >
+              ✨ {language === "ta" ? "பயிர் ரகங்கள்" : language === "te" ? "పంట రకాలు" : language === "hi" ? "किस्में (Varieties)" : "Crop Varieties"}
+            </button>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--accent)", padding: "6px 14px", borderRadius: 99, border: "1px solid var(--border)" }}>
             <span className="live-dot" />
             <span style={{ fontSize: 12, fontWeight: 600, color: "var(--primary)" }}>LIVE TICKER</span>
           </div>
-          <select id="select-crop-crops" className="input" style={{ width: "auto", paddingRight: 36 }}
-            value={selectedCrop.id} onChange={e => setSelectedCrop(CROPS.find(c => c.id === e.target.value) || CROPS[0])}>
+          <select id="select-crop-crops" className="input responsive-select-dropdown" style={{ paddingRight: 36 }}
+            value={selectedCrop.id} onChange={e => {
+              const found = CROPS.find(c => c.id === e.target.value) || CROPS[0];
+              setSelectedCrop(found);
+              setSelectedVariety(null);
+            }}>
             {CATEGORIES.filter(cat => cat !== "All").map(category => (
               <optgroup key={category} label={getCategoryName(category)}>
                 {CROPS.filter(c => c.category === category).map(c => (
@@ -179,20 +189,172 @@ export default function CropsPage() {
               </optgroup>
             ))}
           </select>
+          {selectedCrop.varieties && selectedCrop.varieties.length > 0 && (
+            <select
+              id="select-variety-crops"
+              className="input responsive-select-dropdown" style={{ paddingRight: 36, borderColor: "var(--primary)" }}
+              value={selectedVariety?.id || "all"}
+              onChange={e => {
+                const val = e.target.value;
+                if (val === "all") setSelectedVariety(null);
+                else {
+                  const v = selectedCrop.varieties?.find(v => v.id === val);
+                  setSelectedVariety(v || null);
+                }
+              }}
+            >
+              <option value="all">✨ {language === "hi" ? "सभी किस्में (All Varieties)" : "All Varieties"}</option>
+              {selectedCrop.varieties.map(v => (
+                <option key={v.id} value={v.id}>
+                  {getVarietyName(v, language)} (₹{v.pricePerKg}/kg)
+                </option>
+              ))}
+            </select>
+          )}
+
         </div>
       </div>
 
       <div className="page-content">
-        {viewMode === "mandi" ? (
+                {viewMode === "varieties" ? (
+          <div className="card" style={{ padding: "20px" }}>
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontFamily: "Playfair Display, serif", fontSize: 22, fontWeight: 700, color: "var(--text)" }}>
+                ✨ {language === "ta" ? "இந்திய பயிர் ரகங்கள் மற்றும் வகைகள்" : language === "te" ? "భారతీయ పంట రకాలు" : language === "hi" ? "भारतीय फसल की प्रमुख किस्मों का विवरण" : "Indian Crop Varieties & Cultivars"}
+              </div>
+              <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>
+                {language === "ta" ? "ஒவ்வொரு பயிரின் சிறந்த ரகங்கள், சந்தை விலைகள் மற்றும் விளைச்சல் பகுதிகள்" :
+                 language === "te" ? "ప్రతి పంట యొక్క ప్రముఖ రకాలు, మార్కెట్ ధరలు మరియు ఉత్పత్తులు" :
+                 language === "hi" ? "फल, सब्जी और फसलों की प्रमुख क्षेत्रीय किस्मों की दरें, उत्पत्ति और विशेषताएं" :
+                 "Select a crop below to explore famous regional varieties, market rates, and harvest traits."}
+              </div>
+            </div>
+
+            {/* Crop Selector Bar */}
+            <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 12, marginBottom: 24 }}>
+              {CROPS.filter(c => c.varieties && c.varieties.length > 0).map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => setSelectedCrop(c)}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: 99,
+                    border: selectedCrop.id === c.id ? "2px solid var(--primary)" : "1px solid var(--border)",
+                    background: selectedCrop.id === c.id ? "var(--primary-glow)" : "var(--bg-card)",
+                    color: selectedCrop.id === c.id ? "var(--primary)" : "var(--text)",
+                    fontWeight: selectedCrop.id === c.id ? 700 : 500,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontSize: 13
+                  }}
+                >
+                  <span>{c.emoji}</span>
+                  <span>{getCropName(c, language)}</span>
+                  <span style={{ fontSize: 11, opacity: 0.8 }}>({c.varieties?.length})</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Selected Crop Varieties Detail */}
+            {selectedCrop.varieties && selectedCrop.varieties.length > 0 ? (
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text)", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+                  <span>{selectedCrop.emoji}</span>
+                  <span>{getCropName(selectedCrop, language)} — {selectedCrop.varieties.length} {language === "hi" ? "किस्में उपलब्ध हैं" : "Varieties Available"}</span>
+                </div>
+
+                <div className="grid-cols-3-responsive" style={{ gap: 16 }}>
+                  {selectedCrop.varieties.map(v => {
+                    const isSelected = selectedVariety?.id === v.id;
+                    return (
+                    <div key={v.id}
+                      onClick={() => {
+                        setSelectedVariety(isSelected ? null : v);
+                        setViewMode("grid");
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      style={{
+                        background: isSelected ? "var(--primary-glow)" : "var(--accent)",
+                        borderRadius: 14,
+                        padding: "18px",
+                        border: isSelected ? "2px solid var(--primary)" : "1px solid var(--border)",
+                        boxShadow: isSelected ? "0 4px 14px rgba(16,185,129,0.2)" : "0 4px 12px rgba(0,0,0,0.04)",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        cursor: "pointer",
+                        transition: "all 0.2s"
+                      }}
+                    >
+                      <div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                          <div style={{ fontWeight: 800, fontSize: 16, color: "var(--text)" }}>
+                            {getVarietyName(v, language)}
+                          </div>
+                          <div style={{ fontSize: 11, background: "var(--bg-card)", color: "var(--primary)", border: "1px solid var(--border)", fontWeight: 700, padding: "4px 9px", borderRadius: 8 }}>
+                            📍 {v.originState}
+                          </div>
+                        </div>
+
+                        <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 16, lineHeight: 1.5 }}>
+                          {getVarietyDesc(v, language)}
+                        </div>
+                      </div>
+
+                      <div style={{ paddingTop: 12, borderTop: "1px dashed var(--border)" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div>
+                            {v.mandiPricePerKg ? (
+                              <>
+                                <div style={{ fontSize: 10.5, color: "#10B981", fontWeight: 800, textTransform: "uppercase" }}>
+                                  🏢 Mandi Wholesale: ₹{v.mandiPricePerKg}/kg (₹{v.mandiPricePerQuintal?.toLocaleString('en-IN')}/q)
+                                </div>
+                                <div style={{ fontSize: 14, fontWeight: 800, color: "var(--primary)", marginTop: 2 }}>
+                                  🏪 Retail Market: ₹{v.pricePerKg}/kg (₹{v.pricePerQuintal.toLocaleString('en-IN')}/q)
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <div style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 700 }}>
+                                  {language === "ta" ? "சந்தை விலை" : language === "te" ? "మార్కెట్ ధర" : language === "hi" ? "बाज़ार भाव" : "Market Rate"}
+                                </div>
+                                <div style={{ fontSize: 18, fontWeight: 800, color: "var(--primary)", marginTop: 2 }}>
+                                  ₹{v.pricePerKg}<span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-muted)" }}>/kg</span>
+                                  <span style={{ fontSize: 11, color: "var(--text-muted)", marginLeft: 6 }}> (₹{v.pricePerQuintal.toLocaleString('en-IN')}/q)</span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+
+                          <div style={{ fontSize: 11, background: "rgba(59, 130, 246, 0.1)", color: "#3B82F6", fontWeight: 700, padding: "4px 10px", borderRadius: 8 }}>
+                            🗓️ {v.season}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-muted)" }}>
+                Select a crop above to view its varieties.
+              </div>
+            )}
+          </div>
+        ) : viewMode === "mandi" ? (
           <MandiComparison initialCropId={selectedCrop.id} />
         ) : (
           <>
             {/* Top stats */}
         <div className="grid-cols-4-responsive" style={{ gap: 14, marginBottom: 22 }}>
           {[
-            { icon: "🌾", label: language === "ta" ? "மொத்த பயிர்கள்" : language === "te" ? "మొత్తం పంటలు" : "Total Crops", value: CROPS.length, sub: "{T.trackedNationwide}" },
-            { icon: "💰", label: language === "ta" ? "தற்போதைய விலை" : language === "te" ? "ప్రస్తుత ధర" : "Current Price", value: formatPrice(liveCrops.find(l => l.id === selectedCrop.id)?.price || selectedCrop.basePrice), sub: `${language === "ta" ? selectedCrop.nameTA : language === "te" ? selectedCrop.nameTE : selectedCrop.name} / ${selectedCrop.unit}${selectedCrop.unit === "quintal" ? ` (${formatPrice((liveCrops.find(l => l.id === selectedCrop.id)?.price || selectedCrop.basePrice) / 100)}/kg)` : ""}` },
-            { icon: "📈", label: language === "ta" ? "MSP விலை" : language === "te" ? "MSP ధర" : "MSP Price", value: selectedCrop.msp > 0 ? formatPrice(selectedCrop.msp) : "—", sub: selectedCrop.msp > 0 ? "{T.govtMinimum}" : "No MSP" },
+            { icon: "🌾", label: language === "ta" ? "மொத்த பயிர்கள்" : language === "te" ? "మొత్తం పంటలు" : "Total Crops", value: CROPS.length, sub: T.trackedNationwide },
+            { icon: "💰", label: language === "ta" ? "தற்போதைய விலை" : language === "te" ? "ప్రస్తుత ధర" : "Current Price", value: selectedVariety ? (selectedVariety.mandiPricePerKg ? `₹${selectedVariety.mandiPricePerKg} - ₹${selectedVariety.pricePerKg}/kg` : `₹${selectedVariety.pricePerKg}/kg`) : formatPrice(liveCrops.find(l => l.id === selectedCrop.id)?.price || selectedCrop.basePrice), sub: selectedVariety ? (selectedVariety.mandiPricePerKg ? `Wholesale Mandi: ₹${selectedVariety.mandiPricePerKg}/kg | Retail: ₹${selectedVariety.pricePerKg}/kg` : `${getVarietyName(selectedVariety, language)} (₹${selectedVariety.pricePerQuintal.toLocaleString("en-IN")}/quintal)`) : `${getCropName(selectedCrop, language)} / ${selectedCrop.unit}${selectedCrop.unit === "quintal" ? ` (${formatPrice((liveCrops.find(l => l.id === selectedCrop.id)?.price || selectedCrop.basePrice) / 100)}/kg)` : ""}` },
+            { icon: "📈", label: language === "ta" ? "MSP விலை" : language === "te" ? "MSP ధర" : "MSP Price", value: selectedCrop.msp > 0 ? formatPrice(selectedCrop.msp) : "—", sub: selectedCrop.msp > 0 ? T.govtMinimum : "No MSP" },
             { icon: "🌦️", label: language === "ta" ? "வானிலை" : language === "te" ? "వాతావరణం" : "Weather", value: weather ? `${weather.temperature}°C` : "—", sub: weather?.condition || location.district },
           ].map(stat => (
             <div key={stat.label} className="stat-card">
@@ -215,7 +377,7 @@ export default function CropsPage() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontFamily: "Playfair Display,serif", fontSize: 17, fontWeight: 700 }}>{L.aiRec}</div>
                 <div style={{ fontSize: 13, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {selectedCrop.emoji} {language === "ta" ? selectedCrop.nameTA : language === "te" ? selectedCrop.nameTE : selectedCrop.name} · {selectedCrop.category}
+                  {selectedCrop.emoji} {selectedVariety ? `${getVarietyName(selectedVariety, language)} (${selectedCrop.name})` : getCropName(selectedCrop, language)} · {selectedCrop.category}
                 </div>
               </div>
               {recommendation && (
@@ -279,9 +441,9 @@ export default function CropsPage() {
                 </div>
                 <div className="grid-cols-2-responsive" style={{ gap: 10, marginTop: 16, position: "relative", zIndex: 1 }}>
                   {[
-                    { label: "{T.humidity}", value: `${weather.humidity}%` },
+                    { label: T.humidity, value: `${weather.humidity}%` },
                     { label: "Wind", value: `${weather.windspeed} km/h` },
-                    { label: "{T.weatherRisk}", value: weather.cropImpact },
+                    { label: T.weatherRisk, value: weather.cropImpact },
                     { label: "Soil Moisture", value: `${weather.soilMoistureIndex}%` },
                   ].map(item => (
                     <div key={item.label} style={{ background: "rgba(255,255,255,0.1)", borderRadius: 10, padding: "8px 12px" }}>

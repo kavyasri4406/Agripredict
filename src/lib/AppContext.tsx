@@ -1,6 +1,8 @@
 "use client";
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from "react";
 import { STATE_DISTRICTS } from "@/lib/locationData";
+import { getPriceAlerts, updateAlertTriggered, dispatchPriceNotification } from "@/lib/priceAlerts";
+import { CROPS, getLivePrice } from "@/lib/cropData";
 
 export type Language = "en" | "ta" | "te" | "kn" | "ml" | "hi";
 
@@ -32,6 +34,8 @@ interface AppContextType {
   unreadCount: number;
   location: LocationInfo;
   setLocation: (loc: LocationInfo) => void;
+  detectLiveLocation: () => Promise<void>;
+  isLocating: boolean;
   language: Language;
   setLanguage: (lang: Language) => void;
 }
@@ -40,26 +44,96 @@ const AppContext = createContext<AppContextType | null>(null);
 
 const DEFAULT_LOCATION: LocationInfo = {
   state: "Tamil Nadu",
-  district: "Chennai",
-  lat: 13.0827,
-  lon: 80.2707,
+  district: "Madurai",
+  lat: 9.9252,
+  lon: 78.1198,
 };
 
-const INITIAL_NOTIFICATIONS: Omit<Notification, "id">[] = [
-  { title: "Market Open 🟢", message: "APMC markets are now open. Live prices are updating.", type: "system", time: new Date(), read: false },
-  { title: "🍅 Tomato Price Alert", message: "Tomato prices up 18% today.", type: "price", time: new Date(Date.now() - 3600000), read: false },
-  { title: "🌧️ Weather Alert", message: "Heavy rain expected in Tamil Nadu. Plan your harvest accordingly.", type: "weather", time: new Date(Date.now() - 7200000), read: true },
-  { title: "🌾 MSP Update", message: "Govt announces new MSP. Rice: ₹2441/quintal, Wheat: ₹2585/quintal.", type: "system", time: new Date(Date.now() - 86400000), read: true },
-];
+const INITIAL_NOTIFICATIONS: Omit<Notification, "id">[] = [];
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [isDark, setIsDark] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>(() =>
-    INITIAL_NOTIFICATIONS.map((n, i) => ({ ...n, id: `init_${i}` }))
-  );
-  const [location, setLocationState] = useState<LocationInfo>(DEFAULT_LOCATION);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [location, setLocationState] = useState<LocationInfo>({
+    state: "Tamil Nadu",
+    district: "Madurai",
+    lat: 9.9252,
+    lon: 78.1198
+  });
   const [language, setLanguageState] = useState<Language>("en");
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
+
+  const detectLiveLocation = async (): Promise<void> => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          // Free reverse geocoding API
+          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+          const data = await res.json();
+          
+          const stateName = data.principalSubdivision || "Tamil Nadu";
+          const districtName = data.city || data.locality || data.localityInfo?.administrative?.[2]?.name || "Chennai";
+
+          // Try matching with STATE_DISTRICTS
+          let matchedState = Object.keys(STATE_DISTRICTS).find(
+            s => s.toLowerCase().includes(stateName.toLowerCase()) || stateName.toLowerCase().includes(s.toLowerCase())
+          ) || "Tamil Nadu";
+
+          let districts = STATE_DISTRICTS[matchedState] || STATE_DISTRICTS["Tamil Nadu"];
+          let matchedDist = districts.find(
+            d => d.name.toLowerCase().includes(districtName.toLowerCase()) || districtName.toLowerCase().includes(d.name.toLowerCase())
+          ) || districts[0];
+
+                  const rawText = (JSON.stringify(data) + " " + stateName + " " + districtName).toLowerCase();
+          // Map Krishnankovil / Madurai / ISP default to Madurai, Tamil Nadu
+          if (rawText.includes("krishnankovil") || rawText.includes("madurai") || matchedDist.name === "Chennai") {
+            matchedState = "Tamil Nadu";
+            matchedDist = { name: "Madurai", lat: 9.9252, lon: 78.1198 };
+          }
+
+        const newLoc = {
+            state: matchedState,
+            district: matchedDist.name,
+            lat: latitude,
+            lon: longitude
+          };
+
+          setLocationState(newLoc);
+          localStorage.setItem("agri_state", matchedState);
+          localStorage.setItem("agri_district", matchedDist.name);
+
+          setToast({
+            id: String(Date.now()),
+            title: "📍 Live Location Detected!",
+            message: `Set to ${matchedDist.name}, ${matchedState}`,
+            type: "system"
+          });
+        } catch (err) {
+          console.error("Geocoding error:", err);
+          setToast({
+            id: String(Date.now()),
+            title: "📍 Location Coordinates Saved",
+            message: `Lat: ${latitude.toFixed(2)}, Lon: ${longitude.toFixed(2)}`,
+            type: "system"
+          });
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (error) => {
+        setIsLocating(false);
+        alert("Unable to retrieve location. Please grant location permissions in your browser.");
+      },
+      { timeout: 10000 }
+    );
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -83,17 +157,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     }
     
-    const storedNotif = localStorage.getItem("agri_notifications");
-    if (storedNotif) {
-      try {
-        const parsed = JSON.parse(storedNotif);
-        const parsedWithDates = parsed.map((n: any) => ({
-          ...n,
-          time: new Date(n.time)
-        }));
-        setNotifications(parsedWithDates);
-      } catch (err) {
-        console.error("Failed to parse stored notifications:", err);
+    if (localStorage.getItem("agri_notif_cleaned_v2") !== "true") {
+      localStorage.removeItem("agri_notifications");
+      localStorage.setItem("agri_notif_cleaned_v2", "true");
+      setNotifications([]);
+    } else {
+      const storedNotif = localStorage.getItem("agri_notifications");
+      if (storedNotif) {
+        try {
+          const parsed = JSON.parse(storedNotif);
+          const parsedWithDates = parsed.map((n: any) => ({
+            ...n,
+            time: new Date(n.time)
+          }));
+          setNotifications(parsedWithDates);
+        } catch (err) {
+          console.error("Failed to parse stored notifications:", err);
+        }
       }
     }
     setHasLoaded(true);
@@ -117,15 +197,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addNotification = useCallback((n: Omit<Notification, "id" | "time" | "read">) => {
     const now = Date.now();
-    const lastTime = lastTriggeredTimeRef.current[n.type] || 0;
+    const alertKey = `${n.type}_${n.title}`;
+    const lastTime = lastTriggeredTimeRef.current[alertKey] || 0;
     
-    // Cooldown of 3 minutes (180,000ms) per alert type to prevent spams
-    if (now - lastTime < 180000) {
-      console.log(`Notification of type "${n.type}" throttled to prevent spam.`);
+    // Cooldown of 1 minute per unique alert to prevent repeating spam
+    if (now - lastTime < 60000) {
+      console.log(`Notification "${n.title}" throttled to prevent spam.`);
       return;
     }
     
-    lastTriggeredTimeRef.current[n.type] = now;
+    lastTriggeredTimeRef.current[alertKey] = now;
     const id = `n_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     setNotifications(prev => [{ ...n, id, time: new Date(), read: false }, ...prev].slice(0, 25));
     setToast({ id, title: n.title, message: n.message, type: n.type });
@@ -135,37 +216,57 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }, 4000);
   }, []);
 
-  // 1. Trigger single daily summary notification on mount
+  // Background monitor for Mandi Price Threshold Alerts
   useEffect(() => {
-    if (typeof window === "undefined" || !hasLoaded) return;
-    
-    const timer = setTimeout(() => {
-      addNotification({
-        title: "📈 Daily Mandi Outlook",
-        message: `Markets in ${location.state} are stable today. Overall price index is up 0.4%. Crop arrivals are normal.`,
-        type: "system"
-      });
-    }, 5000);
-    
-    return () => clearTimeout(timer);
-  }, [hasLoaded]);
+    if (!hasLoaded || typeof window === "undefined") return;
 
-  // 2. Trigger live weather advisory only when user's location changes (based on live cropImpact risk)
-  useEffect(() => {
-    if (typeof window === "undefined" || !hasLoaded) return;
-    
-    import("@/lib/weather").then(({ fetchWeather }) => {
-      fetchWeather(location.lat, location.lon, location.district).then(w => {
-        if (w.cropImpact === "High" || w.cropImpact === "Medium") {
-          addNotification({
-            title: `🌦️ Weather Alert: ${location.district}`,
-            message: `${w.cropImpactNote} (Current: ${w.temperature}°C, ${w.condition})`,
-            type: "weather"
-          });
-        }
-      });
-    });
-  }, [location, hasLoaded, addNotification]);
+    const evaluatePriceAlerts = () => {
+      try {
+        const alerts = getPriceAlerts();
+        const activeAlerts = alerts.filter(a => a.active);
+        if (activeAlerts.length === 0) return;
+
+        activeAlerts.forEach(alert => {
+          const crop = CROPS.find(c => c.id === alert.cropId || c.name.toLowerCase() === alert.cropName.toLowerCase());
+          if (!crop) return;
+          const currentPrice = getLivePrice(crop);
+
+          const isTriggered =
+            (alert.condition === "above" && currentPrice >= alert.targetPrice) ||
+            (alert.condition === "below" && currentPrice <= alert.targetPrice);
+
+          if (isTriggered) {
+            const lastTriggered = alert.lastTriggeredAt ? new Date(alert.lastTriggeredAt).getTime() : 0;
+            // Only trigger once every 10 minutes per alert to avoid repetitive notifications
+            if (Date.now() - lastTriggered > 10 * 60 * 1000) {
+              updateAlertTriggered(alert.id, currentPrice);
+              const conditionSymbol = alert.condition === "above" ? "≥" : "≤";
+              const title = `🚨 Mandi Price Alert: ${alert.cropName}`;
+              const message = `${alert.cropName} at ${alert.mandiName} reached ₹${currentPrice.toLocaleString("en-IN")}/${alert.unit.replace("₹/", "")} (${conditionSymbol} target ₹${alert.targetPrice.toLocaleString("en-IN")})!`;
+              
+              addNotification({
+                title,
+                message,
+                type: "price"
+              });
+              dispatchPriceNotification(title, message);
+            }
+          }
+        });
+      } catch (err) {
+        console.error("Price alert evaluation error:", err);
+      }
+    };
+
+    // Check 4s after mount, then every 60s
+    const initTimer = setTimeout(evaluatePriceAlerts, 4000);
+    const intervalTimer = setInterval(evaluatePriceAlerts, 60000);
+
+    return () => {
+      clearTimeout(initTimer);
+      clearInterval(intervalTimer);
+    };
+  }, [hasLoaded, addNotification]);
 
   const markAllRead = () => setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   const markAsRead = (id: string) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
@@ -185,7 +286,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <AppContext.Provider value={{ isDark, toggleDark, notifications, toast, addNotification, markAllRead, markAsRead, clearNotifications, unreadCount, location, setLocation, language, setLanguage }}>
+    <AppContext.Provider value={{ isDark, toggleDark, notifications, toast, addNotification, markAllRead, markAsRead, clearNotifications, unreadCount, location, setLocation, detectLiveLocation, isLocating, language, setLanguage }}>
       {children}
     </AppContext.Provider>
   );

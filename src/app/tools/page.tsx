@@ -31,7 +31,6 @@ const LABELS: Record<string, any> = {
     tabCalendar: "Crop Calendar",
     tabPest: "Pest Diagnosis",
     tabWarning: "Weather Risk Advisor",
-    tabHeatmap: "Market Heatmap",
     
     // Arbitrage
     arbTitle: "Mandi Price Arbitrage Finder",
@@ -84,16 +83,7 @@ const LABELS: Record<string, any> = {
     warnWeatherAlert: "Active Weather Warning",
     warnRiskLevel: "Market Risk Level",
     warnPriceImpact: "Expected Price Impact",
-    warnAdvice: "Recommended Mitigation Action",
-    
-    // Heatmap
-    heatTitle: "Regional Mandi Supply & Demand Heatmap",
-    heatSub: "Identify markets with low supply (high price potential) or surplus (price drops)",
-    heatSupply: "Supply Volume",
-    heatPricePotential: "Price Potential",
-    heatShortage: "Shortage (High Price)",
-    heatSurplus: "Surplus (Low Price)",
-    heatStable: "Stable"
+    warnAdvice: "Recommended Mitigation Action"
   },
   ta: {
     title: "விவசாயக் கருவிகள் தொகுப்பு",
@@ -102,7 +92,6 @@ const LABELS: Record<string, any> = {
     tabCalendar: "பயிர் காலண்டர்",
     tabPest: "பூச்சி கண்டறிதல்",
     tabWarning: "வானிலை இடர் ஆலோசகர்",
-    tabHeatmap: "சந்தை வரைபடம்",
     
     arbTitle: "மண்டி விலை ஒப்பீடு & போக்குவரத்து லாபக் கணக்கீடு",
     arbSub: "போக்குவரத்து செலவுகளுக்குப் பிறகு எந்த சந்தையில் அதிக நிகர லாபம் கிடைக்கும் என்பதைக் கண்டறியவும்",
@@ -151,15 +140,7 @@ const LABELS: Record<string, any> = {
     warnWeatherAlert: "வானிலை எச்சரிக்கை",
     warnRiskLevel: "சந்தை இடர் நிலை",
     warnPriceImpact: "எதிர்பார்க்கப்படும் விலை தாக்கம்",
-    warnAdvice: "பரிந்துரைக்கப்படும் நடவடிக்கை",
-    
-    heatTitle: "மண்டி வரத்து மற்றும் தேவை வரைபடம்",
-    heatSub: "குறைந்த வரத்து கொண்ட சந்தைகள் (அதிக விலை) அல்லது உபரி வரத்து கொண்ட சந்தைகளைக் (குறைந்த விலை) கண்டறியவும்",
-    heatSupply: "வரத்து அளவு",
-    heatPricePotential: "விலை வாய்ப்பு",
-    heatShortage: "குறைந்த வரத்து (அதிக விலை)",
-    heatSurplus: "அதிக வரத்து (குறைந்த விலை)",
-    heatStable: "நிலையானது"
+    warnAdvice: "பரிந்துரைக்கப்படும் நடவடிக்கை"
   },
   te: {
     title: "ఇంటరాక్టివ్ వ్యవసాయ సాధనాల సూట్",
@@ -168,7 +149,6 @@ const LABELS: Record<string, any> = {
     tabCalendar: "పంట క్యాలెండర్",
     tabPest: "తెగుళ్ల నిర్ధారణ",
     tabWarning: "వాతావరణ ప్రమాద సలహాదారు",
-    tabHeatmap: "మార్కెట్ హీట్‌మ్యాప్",
     
     // Arbitrage
     arbTitle: "మండి ధరల పోలిక & రవాణా లాభాల కాలిక్యులేటర్",
@@ -221,16 +201,7 @@ const LABELS: Record<string, any> = {
     warnWeatherAlert: "వాతావరణ హెచ్చరిక",
     warnRiskLevel: "మార్కెట్ ప్రమాద స్థాయి",
     warnPriceImpact: "ధరలపై పడే ప్రభావం",
-    warnAdvice: "సూచించబడిన నివారణ చర్య",
-    
-    // Heatmap
-    heatTitle: "ప్రాంతీయ మండిల సరఫరా & డిమాండ్ హీట్‌మ్యాప్",
-    heatSub: "తక్కువ సరఫరా ఉన్న మార్కెట్లు (ఎక్కువ ధర వచ్చే అవకాశం) లేదా ఎక్కువ సరఫరా ఉన్న మార్కెట్లను గుర్తించండి",
-    heatSupply: "సరఫరా పరిమాణం",
-    heatPricePotential: "ధర సంభావ్యత",
-    heatShortage: "కొరత (ఎక్కువ ధర)",
-    heatSurplus: "మిగులు (తక్కువ ధర)",
-    heatStable: "స్థిరంగా ఉంది"
+    warnAdvice: "సూచించబడిన నివారణ చర్య"
   }
 };
 
@@ -328,7 +299,7 @@ const getSymptomsForCrop = (cropId: string): { label: string; labelTA: string; l
   const { language } = useApp();
   const L = LABELS[language as Language] || LABELS.en;
   
-  const [activeTab, setActiveTab] = useState<"arbitrage" | "kcc" | "pmkisan" | "cost" | "calendar" | "pest" | "warning" | "heatmap" | "ocr">("arbitrage");
+  const [activeTab, setActiveTab] = useState<"arbitrage" | "kcc" | "pmkisan" | "cost" | "calendar" | "pest" | "warning" | "ocr">("arbitrage");
 
   const [portfolio, setPortfolio] = useState<string[]>([]);
   const [calCrop, setCalCrop] = useState<string>("rice");
@@ -371,10 +342,6 @@ const getSymptomsForCrop = (cropId: string): { label: string; labelTA: string; l
   const [harvestMonth, setHarvestMonth] = useState<string>("November");
   const [weatherAlert, setWeatherAlert] = useState<string>("heavy_rain");
   const [riskAssessment, setRiskAssessment] = useState<any>(null);
-
-  // 5. Heatmap states
-  const [heatmapCrop, setHeatmapCrop] = useState<string>("rice");
-  const [heatmapData, setHeatmapData] = useState<any[]>([]);
 
   // Calculate Arbitrage
   const handleCalculateArbitrage = () => {
@@ -666,42 +633,6 @@ const getSymptomsForCrop = (cropId: string): { label: string; labelTA: string; l
     setRiskAssessment({ risk, impact, advice });
   };
 
-  // Generate heatmap colors
-  const generateHeatmapData = () => {
-    // Randomize slightly based on crop selection
-    const seeds = {
-      rice: [0.35, 0.8, 0.5],
-      wheat: [0.7, 0.4, 0.6],
-      tomato: [0.9, 0.2, 0.7],
-      onion: [0.4, 0.85, 0.45]
-    };
-    
-    const ratios = (seeds as any)[heatmapCrop] || [0.5, 0.5, 0.5];
-    const data = MANDIS.map((m, idx) => {
-      const supplyVal = ratios[idx];
-      let status = "Stable";
-      let color = "#EAB308"; // Amber
-      
-      if (supplyVal < 0.45) {
-        status = L.heatShortage;
-        color = "#15803D"; // Green (Good for selling)
-      } else if (supplyVal > 0.65) {
-        status = L.heatSurplus;
-        color = "#B91C1C"; // Red (Bad for selling)
-      } else {
-        status = L.heatStable;
-      }
-      
-      return {
-        ...m,
-        supply: supplyVal > 0.65 ? "High (Surplus)" : supplyVal < 0.45 ? "Low (Shortage)" : "Moderate (Normal)",
-        status,
-        color
-      };
-    });
-    setHeatmapData(data);
-  };
-
   useEffect(() => {
     handleCalculateArbitrage();
   }, [selectedCrop, qty, selectedVehicle, fuelPrice]);
@@ -709,10 +640,6 @@ const getSymptomsForCrop = (cropId: string): { label: string; labelTA: string; l
   useEffect(() => {
     evaluateWeatherRisk();
   }, [warnCrop, harvestMonth, weatherAlert]);
-
-  useEffect(() => {
-    generateHeatmapData();
-  }, [heatmapCrop]);
 
   return (
     <div style={{ maxWidth: 960, margin: "0 auto", padding: "10px 0" }}>
@@ -733,8 +660,7 @@ const getSymptomsForCrop = (cropId: string): { label: string; labelTA: string; l
           { id: "arbitrage", label: L.tabArbitrage, icon: "🚛" },
           { id: "calendar", label: L.tabCalendar, icon: "📅" },
           { id: "pest", label: L.tabPest, icon: "🔍" },
-          { id: "warning", label: L.tabWarning, icon: "🌦️" },
-          { id: "heatmap", label: L.tabHeatmap, icon: "🗺️" }
+          { id: "warning", label: L.tabWarning, icon: "🌦️" }
         ].map(tab => (
           <button
             key={tab.id}
@@ -1117,84 +1043,6 @@ const getSymptomsForCrop = (cropId: string): { label: string; labelTA: string; l
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* TAB 5: HEATMAP */}
-      {activeTab === "heatmap" && (
-        <div className="card" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)", paddingBottom: 10 }}>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--primary-dark)" }}>🗺️ {L.heatTitle}</div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{L.heatSub}</div>
-            </div>
-            
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <label style={{ fontSize: 13, fontWeight: 600 }}>{L.arbCrop}:</label>
-              <select value={heatmapCrop} onChange={e => setHeatmapCrop(e.target.value)} className="input" style={{ padding: "4px 8px", fontSize: 13 }}>
-                {CROPS.map(c => (
-                  <option key={c.id} value={c.id}>{language === "ta" ? c.nameTA : language === "te" ? c.nameTE : c.name}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="split-layout-2col" style={{ gap: 20 }}>
-            {/* Visual SVG Network Map */}
-            <div style={{ background: "var(--bg)", border: "1.5px solid var(--border)", borderRadius: 18, height: 280, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-              <svg width="100%" height="100%" viewBox="0 0 400 240" style={{ maxWidth: 400 }}>
-                {/* Connections (Links) */}
-                <line x1="80" y1="120" x2="220" y2="60" stroke="var(--border)" strokeWidth="2.5" strokeDasharray="4" />
-                <line x1="80" y1="120" x2="320" y2="160" stroke="var(--border)" strokeWidth="2.5" strokeDasharray="4" />
-                <line x1="220" y1="60" x2="320" y2="160" stroke="var(--border)" strokeWidth="2.5" strokeDasharray="4" />
-                
-                {/* Nellore Mandi Node */}
-                <circle cx="80" cy="120" r="16" fill={heatmapData.find(h => h.id === "nellore")?.color || "#EAB308"} stroke="#fff" strokeWidth="2" />
-                <text x="80" y="150" textAnchor="middle" fill="var(--text)" fontSize="10.5" fontWeight="700">Nellore</text>
-                
-                {/* Guntur Mandi Node */}
-                <circle cx="220" cy="60" r="16" fill={heatmapData.find(h => h.id === "guntur")?.color || "#EAB308"} stroke="#fff" strokeWidth="2" />
-                <text x="220" y="90" textAnchor="middle" fill="var(--text)" fontSize="10.5" fontWeight="700">Guntur</text>
-                
-                {/* Chennai Mandi Node */}
-                <circle cx="320" cy="160" r="16" fill={heatmapData.find(h => h.id === "chennai")?.color || "#EAB308"} stroke="#fff" strokeWidth="2" />
-                <text x="320" y="190" textAnchor="middle" fill="var(--text)" fontSize="10.5" fontWeight="700">Chennai</text>
-              </svg>
-              
-              <div style={{ position: "absolute", bottom: 12, left: 12, display: "flex", gap: 12, background: "var(--bg-card)", padding: "6px 12px", borderRadius: 8, border: "1px solid var(--border)", fontSize: 10 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, background: "#15803D", borderRadius: "50%" }}></span> {L.heatShortage}</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, background: "#EAB308", borderRadius: "50%" }}></span> Normal</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 8, height: 8, background: "#B91C1C", borderRadius: "50%" }}></span> {L.heatSurplus}</div>
-              </div>
-            </div>
-
-            {/* Explanatory Sidebar */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {heatmapData.map(m => (
-                <div key={m.id} style={{
-                  border: "1px solid var(--border)",
-                  borderRadius: 12,
-                  padding: "10px 14px",
-                  background: "var(--bg-card)"
-                }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700 }}>
-                      {language === "ta" ? m.nameTA : language === "te" ? m.nameTE : m.name}
-                    </span>
-                    <span style={{
-                      fontSize: 10.5, fontWeight: 700, padding: "2px 6px", borderRadius: 99,
-                      background: m.color + "20", color: m.color
-                    }}>
-                      {m.status}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                    {L.heatSupply}: <span style={{ fontWeight: 600, color: "var(--text)" }}>{m.supply}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       )}

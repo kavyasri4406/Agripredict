@@ -5,6 +5,8 @@ import Sidebar from "@/components/Sidebar";
 import { getCurrentUser } from "@/lib/auth";
 import { useApp } from "@/lib/AppContext";
 
+import NotificationManager from "@/components/NotificationManager";
+
 const PUBLIC = ["/login"];
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -56,7 +58,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           <span style={{ fontSize: 20 }}>🌾</span>
           <span style={{ fontWeight: 800, fontSize: 16, color: "var(--sidebar-text)" }}>AgriPredict</span>
         </div>
-        <div style={{ width: 24 }} />
+        <NotificationManager />
       </div>
 
       <div style={{ display: "flex", flex: 1 }}>

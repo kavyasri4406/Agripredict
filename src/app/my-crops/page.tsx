@@ -5,18 +5,26 @@ import { CROPS, CATEGORIES, SEASONS, formatPrice, getLivePrice, getCropName, get
 import { getCurrentUser, updatePortfolio } from "@/lib/auth";
 import { useApp } from "@/lib/AppContext";
 import PortfolioPerformanceGraph from "@/components/PortfolioPerformanceGraph";
+import { getPriceAlerts, deletePriceAlert, togglePriceAlert, PriceAlert, dispatchPriceNotification } from "@/lib/priceAlerts";
+import PriceAlertModal from "@/components/PriceAlertModal";
 
 export default function MyCropsPage() {
   const router = useRouter();
-  const { language } = useApp();
+  const { language, addNotification } = useApp();
   const [portfolio, setPortfolio] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [season, setSeason] = useState("All");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alerts, setAlerts] = useState<PriceAlert[]>([]);
   const [addSearch, setAddSearch] = useState("");
   const [toAdd, setToAdd] = useState<string[]>([]);
   const [prices, setPrices] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    setAlerts(getPriceAlerts());
+  }, []);
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -182,6 +190,182 @@ export default function MyCropsPage() {
           </div>
         )}
       </div>
+
+      {/* ── Smart Mandi Price Threshold Alerts ── */}
+      <div style={{ marginTop: 36, marginBottom: 30 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 24 }}>🔔</span>
+              <h2 style={{ fontFamily: "Playfair Display,serif", fontSize: 20, fontWeight: 700, color: "var(--text)" }}>
+                Smart Mandi Price Threshold Alerts
+              </h2>
+              <span style={{
+                fontSize: 11,
+                fontWeight: 700,
+                background: "rgba(16, 185, 129, 0.15)",
+                color: "#047857",
+                border: "1px solid rgba(16, 185, 129, 0.3)",
+                padding: "2px 8px",
+                borderRadius: 12
+              }}>
+                Web Push Enabled
+              </span>
+            </div>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>
+              Set custom price triggers (e.g. "Nellore Paddy &gt; ₹2,400/qtl"). Receive instant alerts on your lockscreen when rates fluctuate.
+            </p>
+          </div>
+
+          <button
+            onClick={() => setShowAlertModal(true)}
+            className="btn btn-primary btn-sm"
+            style={{ display: "flex", alignItems: "center", gap: 6, borderRadius: 10, padding: "8px 16px", fontWeight: 700 }}
+          >
+            <span>+</span>
+            <span>Set New Target Alert</span>
+          </button>
+        </div>
+
+        {/* Alerts Grid */}
+        {alerts.length === 0 ? (
+          <div className="card" style={{ textAlign: "center", padding: "36px 20px" }}>
+            <div style={{ fontSize: 36, marginBottom: 10 }}>🔔</div>
+            <div style={{ fontSize: 15, fontWeight: 700 }}>No Target Price Alerts Set Yet</div>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", maxWidth: 450, margin: "6px auto 16px auto" }}>
+              Stay ahead of market fluctuations! Set threshold triggers to get notified the second mandi prices reach your selling goals.
+            </p>
+            <button onClick={() => setShowAlertModal(true)} className="btn btn-primary btn-sm">
+              + Set Your First Price Alert
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 14 }}>
+            {alerts.map(alert => {
+              const crop = CROPS.find(c => c.id === alert.cropId);
+              const currentLivePrice = prices[alert.cropId] || alert.lastCheckedPrice || crop?.basePrice || 0;
+              const isMet = alert.condition === "above" ? currentLivePrice >= alert.targetPrice : currentLivePrice <= alert.targetPrice;
+
+              return (
+                <div
+                  key={alert.id}
+                  className="card"
+                  style={{
+                    padding: 18,
+                    borderRadius: 16,
+                    border: alert.active
+                      ? isMet
+                        ? "1.5px solid #10B981"
+                        : "1px solid var(--border)"
+                      : "1px dashed var(--border)",
+                    opacity: alert.active ? 1 : 0.65,
+                    background: isMet && alert.active ? "rgba(16, 185, 129, 0.04)" : "var(--bg-card)",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between"
+                  }}
+                >
+                  <div>
+                    {/* Top Row: Crop info + Status */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 24 }}>{crop?.emoji || "🌾"}</span>
+                        <div>
+                          <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{alert.cropName}</div>
+                          <div style={{ fontSize: 11.5, color: "var(--text-muted)" }}>📍 {alert.mandiName}</div>
+                        </div>
+                      </div>
+
+                      <span style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        padding: "2px 8px",
+                        borderRadius: 99,
+                        background: !alert.active ? "var(--bg)" : isMet ? "#DCFCE7" : "rgba(245, 158, 11, 0.15)",
+                        color: !alert.active ? "var(--text-muted)" : isMet ? "#15803D" : "#B45309",
+                        border: "1px solid var(--border)"
+                      }}>
+                        {!alert.active ? "Inactive" : isMet ? "🎯 Target Reached!" : "🟢 Active Tracking"}
+                      </span>
+                    </div>
+
+                    {/* Condition Box */}
+                    <div style={{
+                      background: "var(--bg)",
+                      borderLeft: `4px solid ${alert.condition === "above" ? "#15803D" : "#B91C1C"}`,
+                      padding: "8px 12px",
+                      borderRadius: "0 10px 10px 0",
+                      marginBottom: 12
+                    }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text-muted)" }}>
+                        Trigger Condition
+                      </div>
+                      <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--text)", marginTop: 2 }}>
+                        {alert.condition === "above" ? "📈 Rises Above (≥)" : "📉 Falls Below (≤)"} {formatPrice(alert.targetPrice)} {alert.unit}
+                      </div>
+                    </div>
+
+                    {/* Live Comparison */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, marginBottom: 14 }}>
+                      <span style={{ color: "var(--text-muted)" }}>Current Live Market Rate:</span>
+                      <span style={{ fontWeight: 800, color: "var(--primary-dark)", fontSize: 14 }}>
+                        {formatPrice(currentLivePrice)} {alert.unit}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Actions Row */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid var(--border)", paddingTop: 10 }}>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button
+                        onClick={() => {
+                          togglePriceAlert(alert.id);
+                          setAlerts(getPriceAlerts());
+                        }}
+                        className="btn btn-secondary btn-sm"
+                        style={{ fontSize: 11, padding: "4px 8px" }}
+                      >
+                        {alert.active ? "⏸️ Pause" : "▶️ Resume"}
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          const testTitle = `🚨 Mandi Target Hit: ${alert.cropName}!`;
+                          const testBody = `${alert.mandiName} reached ${formatPrice(currentLivePrice)}/qtl (Target was ${alert.condition === "above" ? ">" : "<"} ${formatPrice(alert.targetPrice)})`;
+                          addNotification({ title: testTitle, message: testBody, type: "price" });
+                          dispatchPriceNotification(testTitle, testBody);
+                        }}
+                        title="Simulate push notification test"
+                        className="btn btn-secondary btn-sm"
+                        style={{ fontSize: 11, padding: "4px 8px" }}
+                      >
+                        📲 Test Push
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        deletePriceAlert(alert.id);
+                        setAlerts(getPriceAlerts());
+                      }}
+                      title="Delete alert"
+                      style={{ background: "none", border: "none", color: "#EF4444", cursor: "pointer", fontSize: 15, padding: "4px" }}
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <PriceAlertModal
+        isOpen={showAlertModal}
+        onClose={() => setShowAlertModal(false)}
+        onAlertCreated={() => setAlerts(getPriceAlerts())}
+      />
 
       {/* Add Crop Modal */}
       {showAddModal && (

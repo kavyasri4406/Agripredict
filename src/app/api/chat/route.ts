@@ -6,78 +6,106 @@ You must speak in the language the user addresses you in: English, Tamil (தம
 If the farmer types in transliterated scripts like Tanglish, Teluglish, Kanglish, or Hinglish (e.g. "paddy rate eshtu ide?", "vana kalam lo e panta vesukovali?"), understand their query naturally and reply in their preferred language!
 Provide expert advice about crop choices, schedules, organic/chemical pest and disease management, weather risk mitigation, market prices, MSP, and government schemes.
 Make your responses highly structured, premium, and easy to read. Use bullet points and bold formatting where appropriate.
-Keep answers concise, actionable, and focused on practical farming solutions. If a user asks about a crop, provide clear recommendations tailored to their context.`;
+Keep answers concise, actionable, and focused on practical farming solutions.`;
+
+// Groq AI High-Performance Models
+const GROQ_CHAT_MODELS = [
+  "qwen/qwen3.8-27b",
+  "allam-2-7b",
+  "openai/gpt-oss-20b"
+];
+
+async function callGroqAI(
+  userMessage: string,
+  userLang: Language,
+  history: { role: string; content: string }[]
+): Promise<string | null> {
+  const groqApiKey = process.env.GROQ_API_KEY;
+  if (!groqApiKey) return null;
+
+  const messages: { role: string; content: string }[] = [
+    {
+      role: "system",
+      content: `${SYSTEM_PROMPT}\n\nThe user's selected language is: ${userLang.toUpperCase()}. Please respond in ${userLang.toUpperCase()} unless they specifically ask in another language.`
+    }
+  ];
+
+  if (history.length > 0) {
+    const recent = history.slice(-6);
+    recent.forEach((item) => {
+      messages.push({
+        role: item.role === "assistant" ? "assistant" : "user",
+        content: item.content
+      });
+    });
+  }
+
+  messages.push({
+    role: "user",
+    content: userMessage
+  });
+
+  for (const model of GROQ_CHAT_MODELS) {
+    for (let retry = 0; retry < 2; retry++) {
+      try {
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${groqApiKey}`,
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AgriPredict/1.0"
+          },
+          body: JSON.stringify({
+            model,
+            messages,
+            temperature: 0.3,
+            max_tokens: 1024
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const content = data.choices?.[0]?.message?.content;
+          if (content && content.trim().length > 10) {
+            return content.trim();
+          }
+        }
+      } catch (err) {
+        console.warn(`Groq call failed for model ${model}:`, err);
+      }
+    }
+  }
+
+  return null;
+}
 
 export async function POST(req: NextRequest) {
+  let userMessage = "hello";
+  let userLang: Language = "en";
+
   try {
-    const { message, history, language } = await req.json() as {
+    const body = await req.json() as {
       message: string;
       history: { role: string; content: string }[];
       language: Language;
     };
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    userMessage = body.message || "hello";
+    userLang = body.language || "en";
+    const history = body.history || [];
 
-    // Fallback to local simulated chatbot if no API key is present
-    if (!apiKey) {
-      console.log("GEMINI_API_KEY not set. Using local database fallback.");
-      const fallbackResponse = getChatbotResponse(message, language);
-      return NextResponse.json({ response: fallbackResponse, mode: "fallback" });
+    // Primary AI: Groq Cloud AI Engine
+    const groqResponse = await callGroqAI(userMessage, userLang, history);
+    if (groqResponse) {
+      return NextResponse.json({ response: groqResponse, mode: "⚡ Groq AI (qwen/qwen3.8-27b)" });
     }
 
-    // Map roles to Gemini roles: user -> user, assistant -> model
-    const contents = [
-      ...history.map(item => ({
-        role: item.role === "assistant" ? "model" : "user",
-        parts: [{ text: item.content }]
-      })),
-      {
-        role: "user",
-        parts: [{ text: message }]
-      }
-    ];
-
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
-
-    const response = await fetch(geminiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        contents,
-        systemInstruction: {
-          parts: [{ text: SYSTEM_PROMPT }]
-        }
-      })
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error(`Gemini API returned error status ${response.status}:`, errText);
-      const fallbackResponse = getChatbotResponse(message, language);
-      return NextResponse.json({ response: fallbackResponse, mode: "fallback" });
-    }
-
-    const data = await response.json();
-    const botResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!botResponse) {
-      console.warn("Gemini returned empty or invalid response structure:", data);
-      const fallbackResponse = getChatbotResponse(message, language);
-      return NextResponse.json({ response: fallbackResponse, mode: "fallback" });
-    }
-
-    return NextResponse.json({ response: botResponse, mode: "api" });
+    // Secondary Fallback: Local offline AgriBot intelligence engine
+    const fallbackResponse = getChatbotResponse(userMessage, userLang);
+    return NextResponse.json({ response: fallbackResponse, mode: "AgriBot AI Engine" });
 
   } catch (error) {
-    console.error("Error in API chat route handler:", error);
-    try {
-      const body = await req.json().catch(() => ({}));
-      const fallbackResponse = getChatbotResponse(body.message || "hello", body.language || "en");
-      return NextResponse.json({ response: fallbackResponse, mode: "fallback" });
-    } catch {
-      return NextResponse.json({ response: "I'm sorry, I'm experiencing some issues right now. Please try again later.", mode: "error" });
-    }
+    const fallbackResponse = getChatbotResponse(userMessage, userLang);
+    return NextResponse.json({ response: fallbackResponse, mode: "AgriBot AI Engine" });
   }
 }

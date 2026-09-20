@@ -1,11 +1,12 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { getCurrentUser, logout, updateUserLocation } from "@/lib/auth";
 import { useApp } from "@/lib/AppContext";
 import { APP_TRANSLATIONS } from "@/lib/appTranslations";
-import { INDIAN_STATES, STATE_DISTRICTS } from "@/lib/locationData";
 import type { User } from "@/lib/auth";
+import NotificationManager from "@/components/NotificationManager";
 
 const NAV = [
   { href: "/", icon: "🏠", label: "Dashboard", labelTA: "முகப்பு", labelTE: "డాష్‌బోర్డ్", labelKN: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್", labelML: "ഡാഷ്‌ബോർഡ്", labelHI: "डैशबोर्ड" },
@@ -14,7 +15,7 @@ const NAV = [
   { href: "/analytics", icon: "📊", label: "Analytics", labelTA: "பகுப்பாய்வு", labelTE: "విశ్లేషణలు", labelKN: "ವಿಶ್ಲೇಷಣೆಗಳು", labelML: "വിശകലനങ്ങൾ", labelHI: "विश्लेषण" },
   { href: "/schemes", icon: "🏛️", label: "Govt Schemes", labelTA: "அரசு திட்டங்கள்", labelTE: "ప్రభుత్వ పథకాలు", labelKN: "ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು", labelML: "സർക്കാർ പദ്ധതികൾ", labelHI: "सरकारी योजनाएं" },
   { href: "/tools", icon: "🛠️", label: "Agri-Tools", labelTA: "விவசாய கருவிகள்", labelTE: "వ్యవసాయ సాధనాలు", labelKN: "ಕೃಷಿ ಉಪಕರಣಗಳು", labelML: "കാർഷിക ഉപകരണങ്ങൾ", labelHI: "कृषि उपकरण" },
-  { href: "/chatbot", icon: "🤖", label: "AI Chatbot", labelTA: "AI சாட்", labelTE: "AI చాట్", labelKN: "AI ಚಾಟ್‌ಬಾಟ್", labelML: "AI ചാറ്റ്ബോട്ട്", labelHI: "एआई चैटबॉट" },
+  { href: "/chatbot", icon: "🤖", label: "AgriBot", labelTA: "அக்ரிபாட்", labelTE: "అగ్రిబాట్", labelKN: "ಅಗ್ರಿಬಾಟ್", labelML: "അഗ്രിബോട്ട്", labelHI: "एग्रीबॉट" },
   { href: "/documents", icon: "📄", label: "Doc Scanner", labelTA: "ஆவண ஸ்கேனர்", labelTE: "డాక్ స్కానర్", labelKN: "ದಾಖಲೆ ಸ್ಕ್ಯಾನರ್", labelML: "രേഖ സ്കാനർ", labelHI: "दस्तावेज़ स्कैनर" },
   { href: "/settings", icon: "⚙️", label: "Settings", labelTA: "அமைப்புகள்", labelTE: "సెట్టింగులు", labelKN: "ಸಂಯೋಜನೆಗಳು", labelML: "ക്രമീകരണങ്ങൾ", labelHI: "सेटिंग्स" },
 ];
@@ -38,7 +39,7 @@ interface SidebarProps {
 export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isDark, toggleDark, notifications, markAllRead, markAsRead, clearNotifications, unreadCount, location, setLocation, language, setLanguage } = useApp();
+  const { isDark, toggleDark, notifications, markAllRead, markAsRead, clearNotifications, unreadCount, location, setLocation, detectLiveLocation, isLocating, language, setLanguage } = useApp();
   const T = APP_TRANSLATIONS[language] || APP_TRANSLATIONS.en;
   const [user, setUser] = useState<User | null>(null);
   const [showNotif, setShowNotif] = useState(false);
@@ -65,6 +66,17 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
     if (language === "hi") return item.labelHI;
     return item.label;
   };
+
+  // Prefetch all app routes on mount for instant 0ms navigation
+  useEffect(() => {
+    NAV.forEach(item => {
+      try {
+        router.prefetch(item.href);
+      } catch (err) {
+        // ignore
+      }
+    });
+  }, [router]);
 
   const isActive = (href: string) => href === "/" ? pathname === "/" : pathname.startsWith(href);
 
@@ -96,16 +108,23 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
       <nav className="sidebar-nav">
         <div className="sidebar-section-label">{T.navSection}</div>
         {NAV.map(item => (
-          <button key={item.href} id={`nav-${item.href.replace("/", "") || "home"}`}
+          <Link
+            key={item.href}
+            href={item.href}
+            prefetch={true}
+            id={`nav-${item.href.replace("/", "") || "home"}`}
             className={`sidebar-link ${isActive(item.href) ? "active" : ""}`}
             onClick={() => {
-            router.push(item.href);
-            if (onClose) onClose();
-          }}
+              if (onClose) onClose();
+            }}
+            onMouseEnter={() => {
+              try { router.prefetch(item.href); } catch (e) {}
+            }}
+            style={{ textDecoration: "none" }}
           >
             <span className="sidebar-link-icon">{item.icon}</span>
             <span>{getLabel(item)}</span>
-          </button>
+          </Link>
         ))}
       </nav>
 
@@ -182,6 +201,10 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
                   <button onClick={clearNotifications} style={{ background: "none", border: "none", fontSize: 11, color: "var(--text-muted)", cursor: "pointer" }}>Clear All</button>
                 </div>
               </div>
+              <div style={{ padding: "8px 16px", background: "rgba(92,122,62,0.06)", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 11.5, fontWeight: 700, color: "var(--text)" }}>📲 Lockscreen Alerts:</span>
+                <NotificationManager />
+              </div>
               <div style={{ maxHeight: "320px", overflowY: "auto" }}>
                 {notifications.length === 0 ? (
                   <div style={{ padding: 32, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>
@@ -217,6 +240,34 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
               </div>
             </div>
           )}
+        </div>
+
+                {/* Live Location Button */}
+        <div style={{ marginBottom: 10 }}>
+          <button
+            id="btn-live-location"
+            disabled={isLocating}
+            onClick={detectLiveLocation}
+            style={{
+              width: "100%",
+              background: "rgba(16, 185, 129, 0.12)",
+              border: "1px solid rgba(16, 185, 129, 0.3)",
+              borderRadius: 10,
+              padding: "9px 12px",
+              color: "var(--primary)",
+              fontSize: 12.5,
+              fontWeight: 700,
+              cursor: isLocating ? "wait" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              transition: "all 0.2s"
+            }}
+          >
+            <span>📍</span>
+            <span>{isLocating ? (language === "hi" ? "लोकेशन खोजी जा रही है..." : "Detecting GPS...") : (language === "ta" ? "நேரடி இருப்பிடம் பயன்படுத்து" : language === "te" ? "లైవ్ లొకేషన్ ఉపయోగించండి" : language === "hi" ? "लाइव लोकेशन सेट करें" : "Use Live Location")}</span>
+          </button>
         </div>
 
         {/* Language Selector */}

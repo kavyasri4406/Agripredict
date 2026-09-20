@@ -1,3 +1,25 @@
+export interface CropVariety {
+  id: string;
+  name: string;
+  nameTA?: string;
+  nameTE?: string;
+  nameKN?: string;
+  nameML?: string;
+  nameHI?: string;
+  mandiPricePerKg?: number;
+  mandiPricePerQuintal?: number;
+  pricePerKg: number;
+  pricePerQuintal: number;
+  originState: string;
+  characteristics: string;
+  characteristicsTA?: string;
+  characteristicsTE?: string;
+  characteristicsKN?: string;
+  characteristicsML?: string;
+  characteristicsHI?: string;
+  season: string;
+}
+
 export interface Crop {
   id: string;
   name: string;
@@ -18,11 +40,13 @@ export interface Crop {
   states: string[];
   msp: number;
   color: string; // card accent color
+  varieties?: CropVariety[];
 }
 
 export const CROPS: Crop[] = [
   {
     id: "rice", name: "Rice (Paddy)", nameTA: "நெல்", nameTE: "వరి",
+    varieties: [{"id": "basmati_1121", "mandiPricePerKg": 65, "mandiPricePerQuintal": 6500, "name": "Basmati 1121 (Extra Long Grain)", "nameTA": "பாஸ்மதி 1121 அரிசி", "nameTE": "బాస్మతి 1121 బియ్యం", "nameKN": "ಬಾಸ್ಮತಿ 1121 ಅಕ್ಕಿ", "nameML": "ബസ്മതി 1121 അരി", "nameHI": "बासमती 1121 (एक्स्ट्रा लॉन्ग)", "pricePerKg": 95, "pricePerQuintal": 9500, "originState": "Punjab & Haryana", "characteristics": "Aromatic long grain, expands twice upon cooking, premium export rice", "season": "Kharif"}, {"id": "sona_masoori", "mandiPricePerKg": 32, "mandiPricePerQuintal": 3200, "name": "Sona Masoori (BPT 5204)", "nameTA": "சோனா மசூரி அரிசி", "nameTE": "సోనా మసూరి (BPT 5204)", "nameKN": "ಸೋನಾ ಮಸೂರಿ ಅಕ್ಕಿ", "nameML": "സോനാ മസൂരി അരി", "nameHI": "सोना मसूरी चावल", "pricePerKg": 48, "pricePerQuintal": 4800, "originState": "Andhra Pradesh & Karnataka", "characteristics": "Lightweight, low starch, aromatic medium grain, daily South Indian staple", "season": "Kharif"}],
     category: "Cereals", unit: "quintal", basePrice: 2441, emoji: "🌾",
     image: "https://images.unsplash.com/photo-1604384041761-71d680147eb7?w=500&h=320&fit=crop&q=80",
     description: "India's most important food crop grown in flooded fields",
@@ -41,6 +65,7 @@ export const CROPS: Crop[] = [
   },
   {
     id: "corn", name: "Corn (Maize)", nameTA: "மக்காச்சோளம்", nameTE: "మొక్కజొన్న",
+    varieties: [{"id": "sweet_corn", "mandiPricePerKg": 14, "mandiPricePerQuintal": 1400, "name": "American Sweet Corn", "nameTA": "இனிப்பு மக்காச்சோளம்", "nameTE": "స్వీట్ కార్న్", "nameKN": "ಸ್ವೀಟ್ ಕಾರ್ನ್", "nameML": "സ്വീറ്റ് കോൺ", "nameHI": "स्वीट कॉर्न", "pricePerKg": 30, "pricePerQuintal": 3000, "originState": "Karnataka & Maharashtra", "characteristics": "High sugar content, tender golden kernels, popular for snacking & boiling", "season": "Kharif / Rabi"}, {"id": "flint_corn", "mandiPricePerKg": 17, "mandiPricePerQuintal": 1700, "name": "Desi Yellow Maize (Feed & Starch)", "nameTA": "நாட்டு மக்காச்சோளம்", "nameTE": "దేశీ పసుపు మొక్కజొన్న", "nameKN": "ನಾಟಿ ಮೆಕ್ಕೆಜೋಳ", "nameML": "നാടൻ ചോളം", "nameHI": "देशी पीली मक्का", "pricePerKg": 22, "pricePerQuintal": 2200, "originState": "Andhra Pradesh & Telangana", "characteristics": "Hard grain, high starch, primary choice for poultry feed & ethanol", "season": "Kharif"}],
     category: "Cereals", unit: "quintal", basePrice: 2410, emoji: "🌽",
     image: "https://images.unsplash.com/photo-1599138900450-3d06e89ad309?w=500&h=320&fit=crop&q=80",
     description: "Versatile cereal used as food, feed and in industries",
@@ -77,6 +102,7 @@ export const CROPS: Crop[] = [
   },
   {
     id: "sugarcane", name: "Sugarcane", nameTA: "கரும்பு", nameTE: "చెరకు",
+    varieties: [{"id": "co_0238", "mandiPricePerKg": 3.2, "mandiPricePerQuintal": 320, "name": "Co 0238 High-Yield Cane", "nameTA": "Co 0238 கரும்பு", "nameTE": "Co 0238 చెరకు", "nameKN": "Co 0238 ಕಬ್ಬು", "nameML": "Co 0238 കരിമ്പ്", "nameHI": "Co 0238 गन्ना (उच्च रिकवरी)", "pricePerKg": 3.8, "pricePerQuintal": 380, "originState": "Uttar Pradesh & Maharashtra", "characteristics": "High sugar recovery (>12%), thick canes, high tonnage per acre", "season": "Annual"}, {"id": "co_8603", "mandiPricePerKg": 3.0, "mandiPricePerQuintal": 300, "name": "Co 8603 (Amritha)", "nameTA": "Co 8603 (அமிர்தா கரும்பு)", "nameTE": "Co 8603 చెరకు", "nameKN": "Co 8603 ಕಬ್ಬು", "nameML": "Co 8603 കരിമ്പ്", "nameHI": "Co 8603 (अमृता)", "pricePerKg": 3.6, "pricePerQuintal": 360, "originState": "Tamil Nadu & Karnataka", "characteristics": "Drought tolerant, excellent jaggery (gur) yield, ratoon friendly", "season": "Annual"}],
     category: "Cash Crops", unit: "quintal", basePrice: 315, emoji: "🎋",
     image: "https://images.unsplash.com/photo-1606707718537-af0e5460849b?w=500&h=320&fit=crop&q=80",
     description: "Commercial crop for sugar production and ethanol",
@@ -86,6 +112,7 @@ export const CROPS: Crop[] = [
   },
   {
     id: "cotton", name: "Cotton", nameTA: "பருத்தி", nameTE: "పత్తి",
+    varieties: [{"id": "bt_cotton", "mandiPricePerKg": 62, "mandiPricePerQuintal": 6200, "name": "Bt Cotton (Bollgard II)", "nameTA": "பி.டி பருத்தி", "nameTE": "బి.టి పత్తి", "nameKN": "ಬಿ.ಟಿ ಹತ್ತಿ", "nameML": "ബി.ടി പരുത്തി", "nameHI": "बीटी कपास (बोलगार्ड II)", "pricePerKg": 75, "pricePerQuintal": 7500, "originState": "Gujarat & Telangana", "characteristics": "Long staple fiber, bollworm resistant, high ginning percentage", "season": "Kharif"}],
     category: "Cash Crops", unit: "quintal", basePrice: 8267, emoji: "☁️",
     image: "https://images.unsplash.com/photo-1720723444133-1707028c3e13?w=500&h=320&fit=crop&q=80",
     description: "White gold — the major textile fiber crop of India",
@@ -95,6 +122,7 @@ export const CROPS: Crop[] = [
   },
   {
     id: "tomato", name: "Tomato", nameTA: "தக்காளி", nameTE: "టమాటా",
+    varieties: [{"id": "desi_hybrid", "name": "Desi / Country Tomato", "nameTA": "நாட்டு தக்காளி", "nameTE": "నాటు టమాటా", "nameKN": "ನಾಟಿ ಟೊಮೆಟೊ", "nameML": "നാടൻ തക്കാളി", "nameHI": "देशी टमाटर", "pricePerKg": 35, "pricePerQuintal": 3500, "originState": "Andhra Pradesh & Karnataka", "characteristics": "Sour-tangy taste, juicy pulp, thin skin, essential for curries & rasam", "characteristicsTA": "புளிப்பு சுவை, அதிக சாறு, ரசம் மற்றும் குழம்புகளுக்கு ஏற்றது", "characteristicsTE": "పుల్లని రుచి, రసం మరియు కర్రీలకు ఉత్తమం", "characteristicsKN": "ಹುಳಿ ರುಚಿ, ಸಾಂಬಾರ್ ಮತ್ತು ರಸಂಗೆ ಸೂಕ್ತ", "characteristicsML": "പുളിരുചിയുള്ള നാടൻ ഇനം", "characteristicsHI": "खट्टा-चटपटा स्वाद, रसीला गूदा, करी और रसम के लिए आवश्यक", "season": "All Year"}, {"id": "roma_hybrid", "name": "Roma / Hybrid Salad Tomato", "nameTA": "ஹைப்ரிட் தக்காளி", "nameTE": "హైబ్రిడ్ టమాటా", "nameKN": "ಹೈಬ್ರಿಡ್ ಟೊಮೆಟೊ", "nameML": "ഹൈബ്രിഡ് തക്കാളി", "nameHI": "हाइब्रिड सलाद टमाटर (रोमा)", "pricePerKg": 28, "pricePerQuintal": 2800, "originState": "Maharashtra & Karnataka", "characteristics": "Thick firm skin, long shelf life, ideal for long-distance transport", "characteristicsTA": "தடிமனான தோல், நீண்ட நாட்கள் கெடாமல் இருக்கும்", "characteristicsTE": "మందపాటి చర్మం, ఎక్కువ నిల్వ కాలం", "characteristicsKN": "ಮಂದವಾದ ಸಿಪ್ಪೆ, ದೀರ್ಘ ಬಾಳಿಕೆ", "characteristicsML": "കൂടുതൽ നാൾ കേടാകാതിരിക്കും", "characteristicsHI": "मोटी सख्त त्वचा, लंबी शेल्फ लाइफ, लंबी दूरी के परिवहन के लिए सही", "season": "All Year"}],
     category: "Vegetables", unit: "quintal", basePrice: 2500, emoji: "🍅",
     image: "https://images.unsplash.com/photo-1582284540020-8acbe03fec75?w=500&h=320&fit=crop&q=80",
     description: "High-value vegetable with very volatile market prices",
@@ -104,6 +132,7 @@ export const CROPS: Crop[] = [
   },
   {
     id: "onion", name: "Onion", nameTA: "வெங்காயம்", nameTE: "ఉల్లిపాయ",
+    varieties: [{"id": "nashik_red", "name": "Nashik Red Onion", "nameTA": "நாசிக் பெரிய வெங்காயம்", "nameTE": "నాశిక్ ఎర్ర ఉల్లిపాయ", "nameKN": "ನಾಸಿಕ್ ಕೆಂಪು ಈರುಳ್ಳಿ", "nameML": "നാസിക് സവാള", "nameHI": "नासिक लाल प्याज", "pricePerKg": 32, "pricePerQuintal": 3200, "originState": "Nashik, Maharashtra", "characteristics": "Pungent spicy flavor, dark red skin, benchmark onion of India", "characteristicsTA": "காரமான சுவை, அடர் சிவப்பு தோல்", "characteristicsTE": "ఘాటైన రుచి, ముదురు ఎరుపు చర్మం", "characteristicsKN": "ಖಾರವಾದ ರುಚಿ, ಗಡಸು ಕೆಂಪು ಸಿಪ್ಪೆ", "characteristicsML": "എരിവുള്ള സവാള", "characteristicsHI": "तीखा तीखा स्वाद, गहरा लाल छिलका, भारत का मुख्य प्याज", "season": "Rabi / Kharif"}, {"id": "shallots_podisu", "name": "Shallots / Sambar Small Onion (Podisu)", "nameTA": "சின்ன வெங்காயம்", "nameTE": "సాంబార్ చిన్న ఉల్లిపాయలు", "nameKN": "ಸಾಂಬಾರ್ ಸಣ್ಣ ಈರುಳ್ಳಿ", "nameML": "ചെറിയ ഉള്ളി (ചുവന്നുള്ളി)", "nameHI": "सांभर छोटा प्याज (शैलॉट्स)", "pricePerKg": 55, "pricePerQuintal": 5500, "originState": "Perambalur, Tamil Nadu", "characteristics": "Small clusters, intense aroma & medicinal taste, South Indian cooking staple", "characteristicsTA": "சிறிய வடிவம், சாம்பாருக்கு சிறந்த நறுமணம் மற்றும் மருத்துவ குணம்", "characteristicsTE": "చిన్న పరిమాణం, సాంబార్ కోసం శ్రేష్ఠమైనది", "characteristicsKN": "ಸಾಂಬಾರ್ ಮಾಡಲು ಅತ್ಯುತ್ತಮ ಸಣ್ಣ ಈರುಳ್ಳಿ", "characteristicsML": "സാമ്പാറിനും ഔഷധ ആവശ്യങ്ങൾക്കും ഉത്തമം", "characteristicsHI": "छोटे गुच्छे, तीव्र सुगंध और औषधीय स्वाद, दक्षिण भारतीय भोजन का मुख्य अंग", "season": "All Year"}],
     category: "Vegetables", unit: "quintal", basePrice: 3000, emoji: "🧅",
     image: "https://images.unsplash.com/photo-1587049352851-d4814349319b?w=500&h=320&fit=crop&q=80",
     description: "Essential vegetable, prices highly seasonal and volatile",
@@ -113,6 +142,7 @@ export const CROPS: Crop[] = [
   },
   {
     id: "potato", name: "Potato", nameTA: "உருளைக்கிழங்கு", nameTE: "బంగాళదుంప",
+    varieties: [{"id": "kufri_jyoti", "name": "Kufri Jyoti Potato", "nameTA": "குஃப்ரி ஜோதி உருளைக்கிழங்கு", "nameTE": "కుఫ్రీ జ్యోతి బంగాళాదుంప", "nameKN": "ಕುಫ್ರಿ ಜ್ಯೋತಿ ಆಲೂಗಡ್ಡೆ", "nameML": "കുഫ്രി ജ്യോതി ഉരുളക്കിഴങ്ങ്", "nameHI": "कुफरी ज्योति आलू", "pricePerKg": 24, "pricePerQuintal": 2400, "originState": "West Bengal & Punjab", "characteristics": "Oval smooth skin, excellent cooking quality for curry & boiling", "characteristicsTA": "மென்மையான தோல், சமையலுக்கு மிகவும் சிறந்தது", "characteristicsTE": "మృదువైన చర్మం, వంటకు శ్రేష్ఠమైనది", "characteristicsKN": "ನಯವಾದ ಸಿಪ್ಪೆ, ಅಡುಗೆ ಮಾಡಲು ಅತ್ಯುತ್ತಮ", "characteristicsML": "പാചകത്തിന് ഉത്തമം", "characteristicsHI": "अंडाकार चिकनी त्वचा, करी और उबालने के लिए बेहतरीन गुणवत्ता", "season": "November - March"}, {"id": "chipsona", "name": "Kufri Chipsona (Processing Grade)", "nameTA": "சிப்சோனா உருளைக்கிழங்கு", "nameTE": "చిప్సోనా బంగాళాదుంప", "nameKN": "ಚಿಪ್ಸೋನಾ ಆಲೂಗಡ್ಡೆ", "nameML": "ചിപ്സോന ഉരുളക്കിഴങ്ങ്", "nameHI": "कुफरी चिप्सोना (प्रोसेसिंग आलू)", "pricePerKg": 28, "pricePerQuintal": 2800, "originState": "Uttar Pradesh & Gujarat", "characteristics": "High dry matter, low sugar, preferred choice for chips & French fries", "characteristicsTA": "சிப்ஸ் தயாரிக்க உகந்த தரமான உருளைக்கிழங்கு", "characteristicsTE": "చిప్స్ తయారీకి అనుకూలమైనది", "characteristicsKN": "ಚಿಪ್ಸ್ ಮಾಡಲು ಸೂಕ್ತವಾದ ತಳಿ", "characteristicsML": "ചിപ്സ് നിർമ്മാണത്തിന് ഉത്തമം", "characteristicsHI": "उच्च शुष्क पदार्थ, कम शर्करा, चिप्स और वेफर्स के लिए पहली पसंद", "season": "December - April"}],
     category: "Vegetables", unit: "quintal", basePrice: 1844, emoji: "🥔",
     image: "https://images.unsplash.com/photo-1590311824863-1499596e7308?w=500&h=320&fit=crop&q=80",
     description: "Most consumed vegetable, grown widely in north India",
@@ -149,6 +179,7 @@ export const CROPS: Crop[] = [
   },
   {
     id: "banana", name: "Banana", nameTA: "வாழைப்பழம்", nameTE: "అరటి",
+    varieties: [{"id": "grand_naine", "mandiPricePerKg": 11, "mandiPricePerQuintal": 1100, "name": "Grand Naine (Robusta Cavendish)", "nameTA": "கிராண்ட் நைன் (ஜி9)", "nameTE": "గ్రాండ్ నైన్", "nameKN": "ಗ್ರಾಂಡ್ ನೈನ್", "nameML": "ഗ്രാൻഡ് നൈൻ", "nameHI": "ग्रैंड नैन (केला)", "pricePerKg": 25, "pricePerQuintal": 2500, "originState": "Maharashtra & Tamil Nadu", "characteristics": "High yield, smooth yellow skin, universal commercial choice", "characteristicsTA": "அதிக விளைச்சல், மென்மையான மஞ்சள் தோல்", "characteristicsTE": "అధిక దిగుబడి, మృదువైన పసుపు చర్మం", "characteristicsKN": "ಹೆಚ್ಚಿನ ಇಳುವರಿ, ನಯವಾದ ಹಳದಿ ಸಿಪ್ಪೆ", "characteristicsML": "ഉയർന്ന വിളവ്, മഞ്ഞ ത്വക്ക്", "characteristicsHI": "उच्च उपज, चिकनी पीली त्वचा, व्यावसायिक विकल्प", "season": "All Year"}, {"id": "yelakki_red", "mandiPricePerKg": 28, "mandiPricePerQuintal": 2800, "name": "Red Banana (Chevvazhai / Yelakki)", "nameTA": "செவ்வாழை", "nameTE": "ఎలక్కి / ఎర్ర అరటి", "nameKN": "ಯಾಲಕ್ಕಿ / ಕೆಂಪು ಬಾಳೆ", "nameML": "ചുവന്ന വാഴ (ചെങ്കദളി)", "nameHI": "लाल केला (एलाक्की)", "pricePerKg": 65, "pricePerQuintal": 6500, "originState": "Tamil Nadu & Kerala", "characteristics": "Purplish-red skin, berry-like sweet taste, rich in beta-carotene & antioxidants", "characteristicsTA": "சிவப்பு தோல், அதிக ஊட்டச்சத்து, சுவையான பழம்", "characteristicsTE": "ఎరుపు చర్మం, రుచికరమైన తీపి, బీటా కెరోటిన్ సమృద్ధి", "characteristicsKN": "ಕೆಂಪು ಸಿಪ್ಪೆ, ಔಷಧೀಯ ಗುಣಗಳು, ಅತ್ಯಂತ ಸಿಹಿ", "characteristicsML": "ചുവന്ന തൊലി, പോഷകഗുണങ്ങൾ ഉള്ളത്", "characteristicsHI": "बैंगनी-लाल त्वचा, जामुनी मीठा स्वाद, बीटा-कैरोटीन से भरपूर", "season": "All Year"}, {"id": "nendran", "mandiPricePerKg": 20, "mandiPricePerQuintal": 2000, "name": "Nendran (Ethapazham)", "nameTA": "நேந்திரன்", "nameTE": "నేంద్రన్", "nameKN": "ನೇಂದ್ರನ್", "nameML": "നേന്ത്രപ്പഴം", "nameHI": "नेन्द्रन", "pricePerKg": 45, "pricePerQuintal": 4500, "originState": "Thrissur, Kerala", "characteristics": "Firm texture, ideal for banana chips and traditional cooking, GI tagged", "characteristicsTA": "நேந்திரன் வாழைக்காய் சிப்ஸ் மற்றும் சமையலுக்கு சிறந்தது", "characteristicsTE": "నేంద్రన్ అరటి చిప్స్ తయారీకి ప్రసిద్ధి", "characteristicsKN": "ಬಾಳೆಕಾಯಿ ಚಿಪ್ಸ್ ಮಾಡಲು ಅತ್ಯುತ್ತಮ", "characteristicsML": "ചിപ്സ് നിർമ്മാണത്തിനും പാചകത്തിനും ഉത്തമം", "characteristicsHI": "मजबूत बनावट, केला चिप्स और पारंपरिक खाना पकाने के लिए आदर्श", "season": "August - December"}],
     category: "Fruits", unit: "dozen", basePrice: 35, emoji: "🍌",
     image: "https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=500&h=320&fit=crop&q=80",
     description: "Major fruit crop grown in tropical and subtropical climate",
@@ -158,6 +189,7 @@ export const CROPS: Crop[] = [
   },
   {
     id: "mango", name: "Mango", nameTA: "மாம்பழம்", nameTE: "మామిడి",
+    varieties: [{"id": "alphonso", "mandiPricePerKg": 65, "mandiPricePerQuintal": 6500, "name": "Alphonso (Hapus)", "nameTA": "அல்போன்சா", "nameTE": "ఆల్ఫోన్సో", "nameKN": "ಅಲ್ಫೋನ್ಸೋ", "nameML": "അൽഫോൺസോ", "nameHI": "अल्फ़ांसो (हापुस)", "pricePerKg": 180, "pricePerQuintal": 18000, "originState": "Ratnagiri, Maharashtra", "characteristics": "King of Mangoes, rich aroma, saffron-colored flesh, premium export quality", "characteristicsTA": "மாம்பழங்களின் ராஜா, நறுமணம், குங்குமப்பூ நிறம், ஏற்றுமதி தரம்", "characteristicsTE": "మామిడి పండ్ల రాజు, నాణ్యమైన సువాసన, ఎగుమతి నాణ్యత", "characteristicsKN": "ಮಾವಿನ ಹಣ್ಣುಗಳ ರಾಜ, ಕೆಸರಿ ಬಣ್ಣ, ರಫ್ತು ಗುಣಮಟ್ಟ", "characteristicsML": "മാമ്പഴങ്ങളുടെ രാജാവ്, സവിശേഷ സുഗന്ധം, കയറ്റുമതി തരം", "characteristicsHI": "आमों का राजा, समृद्ध सुगंध, केसरिया रंग, प्रीमियम निर्यात गुणवत्ता", "season": "April - June"}, {"id": "kesar", "mandiPricePerKg": 45, "mandiPricePerQuintal": 4500, "name": "Gir Kesar", "nameTA": "கேசர்", "nameTE": "కేసర్", "nameKN": "ಕೇಸರ್", "nameML": "കേസർ", "nameHI": "गिर केसर", "pricePerKg": 130, "pricePerQuintal": 13000, "originState": "Junagadh, Gujarat", "characteristics": "Distinct sweet fragrance, bright yellow-saffron flesh, GI tagged", "characteristicsTA": "இனிய நறுமணம், மஞ்சள் நிறம், புவிசார் குறியீடு பெற்றது", "characteristicsTE": "ప్రత్యేకమైన తీపి సువాసన, GI ట్యాగ్", "characteristicsKN": "ವಿಶಿಷ್ಟ ಸಿಹಿ ಸುವಾಸನೆ, ಜಿಐ ಟ್ಯಾಗ್ ಪಡೆದಿದೆ", "characteristicsML": "പ്രത്യേക മധുര സുഗന്ധം, GI ടാഗ്", "characteristicsHI": "विशिष्ट मीठी खुशबू, पीला-केसरिया गूदा, जीआई टैग प्राप्त", "season": "May - July"}, {"id": "banganapalli", "mandiPricePerKg": 32, "mandiPricePerQuintal": 3200, "name": "Banganapalli (Benishan)", "nameTA": "பங்கனபள்ளி", "nameTE": "బంగనపల్లి (బెనీషన్)", "nameKN": "ಬಂಗನಪಲ್ಲಿ", "nameML": "ബംഗനപള്ളി", "nameHI": "बंगनापल्ली (सफेदा)", "pricePerKg": 95, "pricePerQuintal": 9500, "originState": "Kurnool, Andhra Pradesh", "characteristics": "Large oval shape, fiberless sweet flesh, golden yellow skin", "characteristicsTA": "பெரிய ஓவல் வடிவம், நார் அற்ற இனிப்பு, தங்க மஞ்சள் தோல்", "characteristicsTE": "పెద్ద ఓవల్ ఆకారం, పీచు లేని తీపి సువాసన", "characteristicsKN": "ದೊಡ್ಡ ಓವಲ್ ಆಕಾರ, ನಾರಿಲ್ಲದ ಸಿಹಿ", "characteristicsML": "വലിയ ഓവൽ രൂപം, നാരുമില്ലാത്ത മധുരം", "characteristicsHI": "बड़ा अंडाकार आकार, रेशे रहित मीठा गूदा, सुनहरा पीला", "season": "April - June"}, {"id": "dasheri", "mandiPricePerKg": 28, "mandiPricePerQuintal": 2800, "name": "Dasheri", "nameTA": "தஷேரி", "nameTE": "దశేరి", "nameKN": "ದಶೇರಿ", "nameML": "ദശേരി", "nameHI": "दशहरी", "pricePerKg": 80, "pricePerQuintal": 8000, "originState": "Malihabad, Uttar Pradesh", "characteristics": "Elongated shape, aromatic sweet juice, northern India favorite", "characteristicsTA": "நீளமான வடிவம், வட இந்தியாவின் மிகவும் புகழ்பெற்ற மாம்பழம்", "characteristicsTE": "పొడవాటి ఆకారం, ఉత్తర భారతదేశంలో ప్రసిద్ధం", "characteristicsKN": "ಉದ್ದವಾದ ಆಕಾರ, ಉತ್ತರ ಭಾರತದ ಅಚ್ಚುಮೆಚ್ಚು", "characteristicsML": "നീളമുള്ള ആകൃതി, മധുരമുള്ള നീര്", "characteristicsHI": "लंबा आकार, सुगंधित मीठा रस, उत्तर भारत का पसंदीदा", "season": "June - July"}, {"id": "totapuri", "name": "Totapuri (Ginimoothu)", "nameTA": "தோத்தாபுரி", "nameTE": "తోతాపురి (గినిమూతి)", "nameKN": "ತೋತಾಪುರಿ (గిಣಿಮೂತಿ)", "nameML": "തൊതാപുരി", "nameHI": "तोतापुरी", "mandiPricePerKg": 8, "mandiPricePerQuintal": 800, "pricePerKg": 25, "pricePerQuintal": 2500, "originState": "Chittoor, Andhra Pradesh & Karnataka", "characteristics": "Parrot-beak tip, tangy-sweet flavor, widely used for juice & pulp processing", "characteristicsTA": "கிளி மூக்கு வடிவம், புளிப்பு-இனிப்பு சுவை, சாறு தயாரிக்க உகந்தது", "characteristicsTE": "చిలుక ముక్కు ఆకారం, రసం కోసం విస్తృతంగా ఉపయోగించబడుతుంది", "characteristicsKN": "ಗಿಳಿ ಮೂಗಿನ ಆಕಾರ, ಜ್ಯೂಸ್ ಮಾಡಲು ಸೂಕ್ತ", "characteristicsML": "തത്തച്ചുണ്ട് പോലുള്ള ആകൃതി, ജ്യൂസിന് ഉപയോഗിക്കുന്നു", "characteristicsHI": "तोते की चोंच जैसा सिरा, खट्टा-मीठा स्वाद, जूस और पल्प निर्माण में प्रयुक्त", "season": "May - July"}],
     category: "Fruits", unit: "quintal", basePrice: 4500, emoji: "🥭",
     image: "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=500&h=320&fit=crop&q=80",
     description: "King of fruits with high festive and export demand",
@@ -167,6 +199,7 @@ export const CROPS: Crop[] = [
   },
   {
     id: "turmeric", name: "Turmeric", nameTA: "மஞ்சள்", nameTE: "పసుపు",
+    varieties: [{"id": "salem_turmeric", "mandiPricePerKg": 110, "mandiPricePerQuintal": 11000, "name": "Salem Erode Turmeric", "nameTA": "சேலம் ஈரோடு மஞ்சள்", "nameTE": "సేలం ఈరోడ్ పసుపు", "nameKN": "ಸೇಲಂ ಮಂಜಲ್", "nameML": "സേലം മഞ്ഞൾ", "nameHI": "सेलम ईरोड हल्दी", "pricePerKg": 140, "pricePerQuintal": 14000, "originState": "Erode, Tamil Nadu", "characteristics": "Bright golden yellow, high curcumin content (3.5%), GI tagged", "season": "January - March"}],
     category: "Spices", unit: "quintal", basePrice: 13500, emoji: "🌱",
     image: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Turmeric_rhizome.jpg/500px-Turmeric_rhizome.jpg",
     description: "High-value spice with strong medicinal and export demand",
@@ -176,6 +209,7 @@ export const CROPS: Crop[] = [
   },
   {
     id: "chilli", name: "Red Chilli", nameTA: "மிளகாய்", nameTE: "మిరప",
+    varieties: [{"id": "guntur_sannam", "mandiPricePerKg": 145, "mandiPricePerQuintal": 14500, "name": "Guntur Sannam Red Chilli (S4)", "nameTA": "குண்டூர் சன்னம் மிளகாய்", "nameTE": "గుంటూరు సన్నం ఎర్ర మిరప (S4)", "nameKN": "ಗುಂಟೂರು ಸನ್ನಂ ಕೆಂಪು ಮೆಣಸಿನಕಾಯಿ", "nameML": "ഗുണ്ടൂർ മുളക്", "nameHI": "गुंटूर सन्नम लाल मिर्च (S4)", "pricePerKg": 190, "pricePerQuintal": 19000, "originState": "Guntur, Andhra Pradesh", "characteristics": "High pungency & capsaicin, deep red color, world-famous hot red chilli", "characteristicsTA": "அதிக காரம், அடர் சிவப்பு நிறம், உலக புகழ்பெற்ற மிளகாய்", "characteristicsTE": "అధిక ఘాటు, ముదురు ఎరుపు రంగు, ప్రపంచ ప్రసిద్ధి", "characteristicsKN": "ಅತ್ಯಂತ ಖಾರ, ಗಡಸು ಕೆಂಪು ಬಣ್ಣ", "characteristicsML": "ഉയർന്ന എരിവ്, കടും ചുവപ്പ് നിറം", "characteristicsHI": "उच्च तीखापन, गहरा लाल रंग, विश्व प्रसिद्ध तीखी लाल मिर्च", "season": "December - May"}, {"id": "byadgi_chilli", "mandiPricePerKg": 185, "mandiPricePerQuintal": 18500, "name": "Byadgi Red Chilli", "nameTA": "பயாட்கி மிளகாய்", "nameTE": "బ్యాడగి మిరప", "nameKN": "ಬ್ಯಾಡಗಿ ಕೆಂಪು ಮೆಣಸಿನಕಾಯಿ", "nameML": "ബായാഡ്ഗി മുളക്", "nameHI": "ब्याडगी लाल मिर्च", "pricePerKg": 240, "pricePerQuintal": 24000, "originState": "Haveri, Karnataka", "characteristics": "Deep red color oil, mild pungency, GI tagged, prized for masala powder & oleoresin", "characteristicsTA": "அடர் சிவப்பு வண்ணம், மிதமான காரம், புவிசார் குறியீடு பெற்றது", "characteristicsTE": "అందమైన ఎరుపు రంగు, మితమైన ఘాటు, GI ట్యాగ్", "characteristicsKN": "ಕಡು ಕೆಂಪು ಬಣ್ಣ, ಮೃದು ಖಾರ, ಮಸಾಲಾ ಪುಡಿಗೆ ಅತ್ಯುತ್ತಮ (ಜಿಐ ಟ್ಯಾಗ್)", "characteristicsML": "മനോഹരമായ കടും ചുവപ്പ് നിറം, ജിഐ ടാഗ്", "characteristicsHI": "गहरा लाल रंग, हल्का तीखापन, जीआई टैग, मसाला और तेल निष्कर्षण हेतु प्रसिद्ध", "season": "January - May"}],
     category: "Spices", unit: "quintal", basePrice: 18000, emoji: "🌶️",
     image: "https://images.unsplash.com/photo-1628543136798-2032a247c7d4?w=500&h=320&fit=crop&q=80",
     description: "High-value spice with strong domestic and export demand",
@@ -230,6 +264,7 @@ export const CROPS: Crop[] = [
   },
   {
     id: "apple", name: "Apple", nameTA: "ஆப்பிள்", nameTE: "ఆపిల్",
+    varieties: [{"id": "royal_delicious", "name": "Shimla Royal Delicious", "nameTA": "சிம்லா ராயல் டெலிசியஸ்", "nameTE": "షిమ్లా రాయల్ డెలీషియస్", "nameKN": "ಶಿಮ್ಲಾ ರಾಯಲ್ ಡೆಲಿಶಿಯಸ್", "nameML": "ഷിംല റോയൽ ഡെലീഷ്യസ്", "nameHI": "शिमला रॉयल डिलीशियस", "pricePerKg": 140, "pricePerQuintal": 14000, "originState": "Shimla, Himachal Pradesh", "characteristics": "Crisp red skin, sweet aromatic juice, India's most popular apple", "characteristicsTA": "சிவப்பு தோல், இனிப்பு சாறு, இந்தியாவின் மிகவும் பிரபல ஆப்பிள்", "characteristicsTE": "ఎరుపు చర్మం, తీపి రసం, ప్రసిద్ధ ఆపిల్", "characteristicsKN": "ಕೆಂಪು ಸಿಪ್ಪೆ, ಸಿಹಿ ರಸ, ಅತ್ಯಂತ ಜನಪ್ರಿಯ ಆಪಲ್", "characteristicsML": "ചുവന്ന തൊലി, മധുരമുള്ള നീര്, ജനപ്രിയ ആപ്പിൾ", "characteristicsHI": "कुरकुरा लाल छिलका, मीठा सुगंधित रस, भारत का सबसे लोकप्रिय सेब", "season": "August - November"}, {"id": "fuji_apple", "mandiPricePerKg": 75, "mandiPricePerQuintal": 7500, "name": "Fuji Apple", "nameTA": "ஃபுஜி ஆப்பிள்", "nameTE": "ఫుజి ఆపిల్", "nameKN": "ಫ್ಯೂಜಿ ಆಪಲ್", "nameML": "ഫ്യൂജി ആപ്പിൾ", "nameHI": "फुजी सेब", "pricePerKg": 180, "pricePerQuintal": 18000, "originState": "Kinnaur, Himachal Pradesh", "characteristics": "Ultra-firm, exceptionally sweet, high juice content and long shelf life", "characteristicsTA": "மிகவும் இனிப்பானது, நீண்ட நாட்கள் கெடாது", "characteristicsTE": "అత్యంత తీపి, సుదీర్ఘ నిల్వ సమయం", "characteristicsKN": "ಅತ್ಯಂತ ಸಿಹಿ, ದೀರ್ಘ ಬಾಳಿಕೆ ಅವಧಿ", "characteristicsML": "വളരെ മധുരമുള്ളത്, ദീർഘകാല സംഭരണം", "characteristicsHI": "अत्यधिक मीठा, भरपूर रस, लंबी शेल्फ लाइफ वाला प्रीमियम सेब", "season": "September - December"}],
     category: "Fruits", unit: "quintal", basePrice: 8000, emoji: "🍎",
     image: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Pink_lady_and_cross_section.jpg/500px-Pink_lady_and_cross_section.jpg",
     description: "Popular fruit grown in cooler climates",
@@ -412,50 +447,139 @@ export interface MandiInfo {
 
 const REGIONAL_MANDIS: Record<string, { name: string; district: string; state: string; dist: number }[]> = {
   "Andhra Pradesh": [
-    { name: "Guntur APMC Mandi", district: "Guntur", state: "Andhra Pradesh", dist: 12 },
-    { name: "Vijayawada Wholesale Market", district: "Krishna", state: "Andhra Pradesh", dist: 38 },
-    { name: "Nellore Grain APMC", district: "Nellore", state: "Andhra Pradesh", dist: 145 },
-    { name: "Kurnool Regional Market", district: "Kurnool", state: "Andhra Pradesh", dist: 210 },
-    { name: "Koyambedu APMC", district: "Chennai", state: "Tamil Nadu", dist: 340 }
+    { name: "Chittoor APMC Mandi", district: "Chittoor", state: "Andhra Pradesh", dist: 8 },
+    { name: "Guntur APMC Yard", district: "Guntur", state: "Andhra Pradesh", dist: 45 },
+    { name: "Vijayawada Wholesale Market", district: "Krishna", state: "Andhra Pradesh", dist: 82 },
+    { name: "Kurnool Benishan Mandi", district: "Kurnool", state: "Andhra Pradesh", dist: 190 },
+    { name: "Koyambedu Wholesale APMC", district: "Chennai", state: "Tamil Nadu", dist: 140 }
   ],
   "Tamil Nadu": [
     { name: "Koyambedu Wholesale APMC", district: "Chennai", state: "Tamil Nadu", dist: 15 },
+    { name: "Erode Turmeric & Grain Mandi", district: "Erode", state: "Tamil Nadu", dist: 95 },
     { name: "Madurai Mattuthavani Mandi", district: "Madurai", state: "Tamil Nadu", dist: 120 },
     { name: "Salem APMC Market", district: "Salem", state: "Tamil Nadu", dist: 180 },
-    { name: "Coimbatore Integrated Market", district: "Coimbatore", state: "Tamil Nadu", dist: 240 },
-    { name: "Guntur APMC Mandi", district: "Guntur", state: "Andhra Pradesh", dist: 390 }
+    { name: "Coimbatore Integrated Market", district: "Coimbatore", state: "Tamil Nadu", dist: 240 }
   ],
   "Telangana": [
     { name: "Warangal Grain Market", district: "Warangal", state: "Telangana", dist: 25 },
     { name: "Khammam APMC Yard", district: "Khammam", state: "Telangana", dist: 85 },
     { name: "Nizamabad Agricultural Market", district: "Nizamabad", state: "Telangana", dist: 160 },
     { name: "Gaddiannaram Fruit & Grain APMC", district: "Hyderabad", state: "Telangana", dist: 140 },
-    { name: "Vijayawada Wholesale Market", district: "Krishna", state: "Andhra Pradesh", dist: 230 }
+    { name: "Guntur APMC Mandi", district: "Guntur", state: "Andhra Pradesh", dist: 230 }
+  ],
+  "Karnataka": [
+    { name: "Yeshwantpur APMC Yard", district: "Bengaluru", state: "Karnataka", dist: 18 },
+    { name: "Bandipalya Mandi", district: "Mysuru", state: "Karnataka", dist: 135 },
+    { name: "Hubballi APMC Market", district: "Dharwad", state: "Karnataka", dist: 240 },
+    { name: "Belagavi Grain Yard", district: "Belagavi", state: "Karnataka", dist: 310 },
+    { name: "Byadgi Chilli Mandi", district: "Haveri", state: "Karnataka", dist: 290 }
+  ],
+  "Maharashtra": [
+    { name: "Vashi APMC Market", district: "Navi Mumbai", state: "Maharashtra", dist: 22 },
+    { name: "Ratnagiri Mango Yard", district: "Ratnagiri", state: "Maharashtra", dist: 180 },
+    { name: "Nashik APMC Onion Yard", district: "Nashik", state: "Maharashtra", dist: 160 },
+    { name: "Pune Gultekdi Market", district: "Pune", state: "Maharashtra", dist: 145 },
+    { name: "Nagpur Grain & Fruit Mandi", district: "Nagpur", state: "Maharashtra", dist: 480 }
+  ],
+  "Kerala": [
+    { name: "Anayara World Market", district: "Thiruvananthapuram", state: "Kerala", dist: 12 },
+    { name: "Sakthan Thampuran Mandi", district: "Thrissur", state: "Kerala", dist: 110 },
+    { name: "Ernakulam Wholesale Market", district: "Ernakulam", state: "Kerala", dist: 95 },
+    { name: "Wayanad Agricultural Yard", district: "Wayanad", state: "Kerala", dist: 210 }
   ],
   "Uttar Pradesh": [
+    { name: "Malihabad Mango Mandi", district: "Lucknow", state: "Uttar Pradesh", dist: 25 },
     { name: "Gonda Grain APMC", district: "Gonda", state: "Uttar Pradesh", dist: 18 },
     { name: "Barabanki Mandi Samiti", district: "Barabanki", state: "Uttar Pradesh", dist: 62 },
     { name: "Hapur APMC Market", district: "Hapur", state: "Uttar Pradesh", dist: 210 },
-    { name: "Bareilly Grain Yard", district: "Bareilly", state: "Uttar Pradesh", dist: 175 },
-    { name: "Azadpur APMC", district: "North Delhi", state: "Delhi", dist: 280 }
+    { name: "Bareilly Grain Yard", district: "Bareilly", state: "Uttar Pradesh", dist: 175 }
   ],
   "Punjab": [
     { name: "Khanna Grain Market", district: "Ludhiana", state: "Punjab", dist: 14 },
     { name: "Rajpura APMC Yard", district: "Patiala", state: "Punjab", dist: 45 },
     { name: "Amritsar Grain Market", district: "Amritsar", state: "Punjab", dist: 130 },
-    { name: "Jalandhar APMC", district: "Jalandhar", state: "Punjab", dist: 95 },
-    { name: "Azadpur APMC", district: "North Delhi", state: "Delhi", dist: 310 }
+    { name: "Jalandhar APMC", district: "Jalandhar", state: "Punjab", dist: 95 }
+  ]
+};
+
+const CROP_SPECIFIC_MANDIS: Record<string, { name: string; district: string; state: string; dist: number; basePrice: number }[]> = {
+  mango: [
+    { name: "Chittoor APMC Fruit Mandi", district: "Chittoor", state: "Andhra Pradesh", dist: 8, basePrice: 800 },
+    { name: "Madanapalle APMC Yard", district: "Annamayya", state: "Andhra Pradesh", dist: 48, basePrice: 920 },
+    { name: "Kurnool Banganapalli Mandi", district: "Kurnool", state: "Andhra Pradesh", dist: 190, basePrice: 1250 },
+    { name: "Koyambedu Wholesale APMC", district: "Chennai", state: "Tamil Nadu", dist: 140, basePrice: 1800 },
+    { name: "Gaddiannaram Fruit APMC", district: "Hyderabad", state: "Telangana", dist: 310, basePrice: 2100 }
+  ],
+  chilli: [
+    { name: "Guntur APMC Yard (Chilli Hub)", district: "Guntur", state: "Andhra Pradesh", dist: 12, basePrice: 14500 },
+    { name: "Khammam APMC Yard", district: "Khammam", state: "Telangana", dist: 85, basePrice: 13800 },
+    { name: "Warangal APMC Yard", district: "Warangal", state: "Telangana", dist: 140, basePrice: 14100 },
+    { name: "Byadgi APMC Yard", district: "Haveri", state: "Karnataka", dist: 420, basePrice: 18500 },
+    { name: "Koyambedu APMC", district: "Chennai", state: "Tamil Nadu", dist: 340, basePrice: 16200 }
+  ],
+  onion: [
+    { name: "Lasalgaon APMC (Asia's Largest)", district: "Nashik", state: "Maharashtra", dist: 160, basePrice: 1400 },
+    { name: "Pimpalgaon APMC", district: "Nashik", state: "Maharashtra", dist: 175, basePrice: 1450 },
+    { name: "Kurnool Onion Yard", district: "Kurnool", state: "Andhra Pradesh", dist: 190, basePrice: 1600 },
+    { name: "Vashi APMC", district: "Navi Mumbai", state: "Maharashtra", dist: 220, basePrice: 1850 },
+    { name: "Koyambedu APMC", district: "Chennai", state: "Tamil Nadu", dist: 340, basePrice: 2100 }
+  ],
+  banana: [
+    { name: "Theni APMC Banana Yard", district: "Theni", state: "Tamil Nadu", dist: 140, basePrice: 1100 },
+    { name: "Trichy APMC Market", district: "Tiruchirappalli", state: "Tamil Nadu", dist: 190, basePrice: 1150 },
+    { name: "Jalgaon APMC Market", district: "Jalgaon", state: "Maharashtra", dist: 450, basePrice: 1250 },
+    { name: "Koyambedu APMC", district: "Chennai", state: "Tamil Nadu", dist: 210, basePrice: 1600 }
+  ],
+  gram: [
+    { name: "Guntur APMC Yard", district: "Guntur", state: "Andhra Pradesh", dist: 45, basePrice: 5875 },
+    { name: "Kurnool Grain Market", district: "Kurnool", state: "Andhra Pradesh", dist: 190, basePrice: 5950 },
+    { name: "Latur Grain APMC", district: "Latur", state: "Maharashtra", dist: 390, basePrice: 6100 },
+    { name: "Indore Choithram Mandi", district: "Indore", state: "Madhya Pradesh", dist: 580, basePrice: 6350 }
+  ],
+  rice: [
+    { name: "Nandyal APMC Paddy Yard", district: "Kurnool", state: "Andhra Pradesh", dist: 180, basePrice: 2441 },
+    { name: "Miryalaguda APMC", district: "Nalgonda", state: "Telangana", dist: 210, basePrice: 2520 },
+    { name: "Nellore APMC Yard", district: "Nellore", state: "Andhra Pradesh", dist: 145, basePrice: 2580 },
+    { name: "Khanna Grain Market", district: "Ludhiana", state: "Punjab", dist: 1100, basePrice: 2750 }
+  ],
+  wheat: [
+    { name: "Khanna Grain Market", district: "Ludhiana", state: "Punjab", dist: 450, basePrice: 2585 },
+    { name: "Indore Choithram Mandi", district: "Indore", state: "Madhya Pradesh", dist: 520, basePrice: 2720 },
+    { name: "Hapur APMC Market", district: "Hapur", state: "Uttar Pradesh", dist: 610, basePrice: 2640 },
+    { name: "Kota Krishi Upaj Mandi", district: "Kota", state: "Rajasthan", dist: 590, basePrice: 2680 }
+  ],
+  apple: [
+    { name: "Shimla APMC Yard (Fruit Hub)", district: "Shimla", state: "Himachal Pradesh", dist: 850, basePrice: 5500 },
+    { name: "Sopore Fruit Mandi (Kashmir)", district: "Baramulla", state: "Jammu & Kashmir", dist: 1250, basePrice: 5200 },
+    { name: "Azadpur APMC", district: "North Delhi", state: "Delhi", dist: 650, basePrice: 7200 },
+    { name: "Koyambedu APMC", district: "Chennai", state: "Tamil Nadu", dist: 140, basePrice: 8500 }
+  ],
+  turmeric: [
+    { name: "Erode Turmeric APMC (Turmeric City)", district: "Erode", state: "Tamil Nadu", dist: 120, basePrice: 11000 },
+    { name: "Nizamabad APMC Market", district: "Nizamabad", state: "Telangana", dist: 280, basePrice: 11400 },
+    { name: "Sangli Turmeric Yard", district: "Sangli", state: "Maharashtra", dist: 420, basePrice: 12200 }
+  ],
+  cotton: [
+    { name: "Warangal Cotton Yard", district: "Warangal", state: "Telangana", dist: 140, basePrice: 6200 },
+    { name: "Rajkot APMC Mandi", district: "Rajkot", state: "Gujarat", dist: 680, basePrice: 6550 },
+    { name: "Adoni APMC Market", district: "Kurnool", state: "Andhra Pradesh", dist: 220, basePrice: 6300 }
+  ],
+  tomato: [
+    { name: "Madanapalle APMC (Tomato Hub)", district: "Annamayya", state: "Andhra Pradesh", dist: 45, basePrice: 1200 },
+    { name: "Kolar APMC Tomato Yard", district: "Kolar", state: "Karnataka", dist: 85, basePrice: 1350 },
+    { name: "Chittoor Local APMC", district: "Chittoor", state: "Andhra Pradesh", dist: 12, basePrice: 1250 },
+    { name: "Koyambedu APMC", district: "Chennai", state: "Tamil Nadu", dist: 140, basePrice: 1900 }
   ]
 };
 
 export function getMandiComparison(crop: Crop, userState: string = "Andhra Pradesh"): MandiInfo[] {
-  const mandis = REGIONAL_MANDIS[userState] || REGIONAL_MANDIS["Andhra Pradesh"];
-  const baselinePrice = crop.basePrice;
+  const customMandis = CROP_SPECIFIC_MANDIS[crop.id];
+  const mandis = customMandis || REGIONAL_MANDIS[userState] || REGIONAL_MANDIS["Andhra Pradesh"];
+  const baseline = crop.basePrice;
 
-  const result: MandiInfo[] = mandis.map((m, idx) => {
-    const varianceMultiplier = (idx === 0 ? 0.04 : idx === 1 ? -0.02 : idx === 2 ? 0.015 : idx === 3 ? -0.035 : 0.06);
-    const mPrice = Math.round(baselinePrice * (1 + varianceMultiplier));
-    const diff = mPrice - baselinePrice;
+  const result: MandiInfo[] = mandis.map((m: any, idx: number) => {
+    const price = m.basePrice ? m.basePrice : Math.round(baseline * (1 + (idx === 0 ? 0 : idx * 0.08)));
+    const diff = price - baseline;
 
     return {
       id: `mandi_${idx}_${crop.id}`,
@@ -463,13 +587,14 @@ export function getMandiComparison(crop: Crop, userState: string = "Andhra Prade
       district: m.district,
       state: m.state,
       distanceKm: m.dist,
-      price: mPrice,
+      price: price,
       priceDiff: diff,
-      arrivalsTons: Math.floor(120 + (5 - idx) * 45 + Math.random() * 30),
+      arrivalsTons: Math.floor(180 + (5 - idx) * 65 + (idx % 3) * 25),
       trend: diff > 0 ? "up" : diff < 0 ? "down" : "stable"
     };
   });
 
+  // Highlight highest paying mandi dynamically per crop
   let highestIdx = 0;
   for (let i = 1; i < result.length; i++) {
     if (result[i].price > result[highestIdx].price) {
@@ -1131,4 +1256,22 @@ export function getCropDesc(crop: Crop, lang: string): string {
   if (lang === "ta") return crop.descTA || crop.description;
   if (lang === "te") return crop.descTE || crop.description;
   return crop.description;
+}
+
+export function getVarietyName(v: CropVariety, lang: string): string {
+  if (lang === "ta") return v.nameTA || v.name;
+  if (lang === "te") return v.nameTE || v.name;
+  if (lang === "kn") return v.nameKN || v.name;
+  if (lang === "ml") return v.nameML || v.name;
+  if (lang === "hi") return v.nameHI || v.name;
+  return v.name;
+}
+
+export function getVarietyDesc(v: CropVariety, lang: string): string {
+  if (lang === "ta") return v.characteristicsTA || v.characteristics;
+  if (lang === "te") return v.characteristicsTE || v.characteristics;
+  if (lang === "kn") return v.characteristicsKN || v.characteristics;
+  if (lang === "ml") return v.characteristicsML || v.characteristics;
+  if (lang === "hi") return v.characteristicsHI || v.characteristics;
+  return v.characteristics;
 }

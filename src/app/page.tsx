@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { useApp } from "@/lib/AppContext";
 import type { User } from "@/lib/auth";
+import NotificationManager from "@/components/NotificationManager";
 
 const LABELS = {
   en: {
@@ -12,8 +13,8 @@ const LABELS = {
     intro: "Your AI-powered agricultural companion. AgriPredict helps you track live market prices, analyze historical price trends, receive local weather forecasts, and consult our multilingual AI farming expert.",
     cropsTitle: "Live Crop Prices",
     cropsDesc: "Browse real-time prices for cereals, vegetables, pulses, and fruits with category-specific filters.",
-    chatbotTitle: "AI Farming Bot",
-    chatbotDesc: "Chat in English, Tamil, or Telugu to ask about pest control, farming advice, and market guidelines.",
+    chatbotTitle: "AgriBot",
+    chatbotDesc: "Chat with AgriBot in English, Tamil, Telugu, Kannada, Malayalam, or Hindi for farming advice, crop choices & market guidelines.",
     analyticsTitle: "Market Analytics",
     analyticsDesc: "Check 30-day forecast curves and price volatility indexes to make informed harvesting decisions.",
     portfolioTitle: "My Tracked Crops",
@@ -26,7 +27,7 @@ const LABELS = {
     intro: "உங்கள் AI-இயங்கும் விவசாய துணை. அக்ரிபிரடிக்ட் உங்களுக்கு நேரடி சந்தை விலைகளை கண்காணிக்கவும், வரலாற்று விலை போக்குகளை பகுப்பாய்வு செய்யவும், உள்ளூர் வானிலை முன்னறிவிப்புகளை பெறவும் மற்றும் எங்கள் பன்மொழி AI விவசாய நிபுணரிடம் ஆலோசனை பெறவும் உதவுகிறது.",
     cropsTitle: "நேரடி பயிர் விலைகள்",
     cropsDesc: "வகை சார்ந்த வடிகட்டிகளுடன் தானியங்கள், காய்கறிகள், பருப்புகள் மற்றும் பழங்களின் நிகழ்நேர விலைகளை உலாவுக.",
-    chatbotTitle: "AI விவசாய சாட்",
+    chatbotTitle: "AgriBot",
     chatbotDesc: "பூச்சிக் கட்டுப்பாடு, விவசாய ஆலோசனை மற்றும் சந்தை வழிகாட்டுதல்கள் பற்றி ஆங்கிலம், தமிழ் அல்லது தெலுங்கில் கேளுங்கள்.",
     analyticsTitle: "சந்தை பகுப்பாய்வு",
     analyticsDesc: "விவேகமான அறுவடை முடிவுகளை எடுக்க 30 நாள் கணிப்பு வளைவுகள் மற்றும் விலை ஏற்ற இறக்க குறியீடுகளை சரிபார்க்கவும்.",
@@ -40,7 +41,7 @@ const LABELS = {
     intro: "మీ AI-ఆధారిత వ్యవసాయ సహాయకారి. అగ్రిప్రెడిక్ట్ మీకు ప్రత్యక్ష మార్కెట్ ధరలను ట్రాక్ చేయడంలో, చారిత్రక ధరల పోకడలను విశ్లేషించడంలో, స్థానిక వాతావరణ అంచనాలను పొందడంలో మరియు మా బహుభాషా AI వ్యవసాయ నిపుణుడిని సంప్రదించడంలో సహాయపడుతుంది.",
     cropsTitle: "ప్రత్యక్ష పంట ధరలు",
     cropsDesc: "వర్గాల వారీగా ఫిల్టర్లతో తృణధాన్యాలు, కూరగాయలు, పప్పుధాన్యాలు మరియు పండ్ల నిజ సమయ ధరలను బ్రౌజ్ చేయండి.",
-    chatbotTitle: "AI వ్యవసాయ చాట్",
+    chatbotTitle: "AgriBot",
     chatbotDesc: "తెగుళ్ల నివారణ, వ్యవసాయ సలహాలు మరియు మార్కెట్ మార్గదర్శకాల గురించి ఇంగ్లీష్, తమిళ్ లేదా తెలుగులో చాట్ చేయండి.",
     analyticsTitle: "మార్కెట్ విశ్లేషణలు",
     analyticsDesc: "సమర్థవంతమైన పంట కోత నిర్ణయాలు తీసుకోవడానికి 30 రోజుల ధరల అంచనా వక్రతలను మరియు ధరల హెచ్చుతగ్గుల సూచికలను తనిఖీ చేయండి.",
@@ -100,7 +101,10 @@ export default function DashboardIntroPage() {
 
   useEffect(() => {
     setUser(getCurrentUser());
-  }, []);
+    ["/crops", "/my-crops", "/analytics", "/schemes", "/tools", "/chatbot", "/ocr", "/settings"].forEach(path => {
+      try { router.prefetch(path); } catch (e) {}
+    });
+  }, [router]);
 
   return (
     <div style={{ maxWidth: 840, margin: "0 auto", padding: "10px 0" }}>
@@ -144,9 +148,12 @@ export default function DashboardIntroPage() {
           }}>
             {L.intro}
           </p>
-          <button id="btn-explore-crops" className="btn btn-primary btn-lg" onClick={() => router.push("/crops")}>
-            {L.getStarted}
-          </button>
+          <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+            <button id="btn-explore-crops" className="btn btn-primary btn-lg" onClick={() => router.push("/crops")}>
+              {L.getStarted}
+            </button>
+            <NotificationManager />
+          </div>
         </div>
         
         {/* Subtle decorative background wheat graphics */}

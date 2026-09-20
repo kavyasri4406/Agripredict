@@ -157,28 +157,56 @@ export default function SettingsPage() {
       setName(current.name);
       setRole(current.role || "Farmer");
       setSelectedAvatar(current.avatar || "🌾");
-      setSelectedState(current.state || location.state);
-            setSelectedDistrict(current.district || location.district);
       if (current.farmProfile) {
         setLandSize(current.farmProfile.landSize || 3);
         setSoilType(current.farmProfile.soilType || "Red Loamy");
         setIrrigationType(current.farmProfile.irrigationType || "Drip Irrigation");
       }
-    } else {
-      setSelectedState(location.state);
-      setSelectedDistrict(location.district);
     }
-  }, [location]);
+    setSelectedState(location.state);
+    setSelectedDistrict(location.district);
+  }, [location.state, location.district]);
 
-  // Handle state change
+  // Handle state change with instant AppContext & localStorage sync
   const handleStateChange = (stateName: string) => {
     setSelectedState(stateName);
     const districts = STATE_DISTRICTS[stateName] || [];
-    if (districts.length > 0) {
-      setSelectedDistrict(districts[0].name);
-    } else {
-      setSelectedDistrict("");
+    const newDist = districts.length > 0 ? districts[0].name : "";
+    setSelectedDistrict(newDist);
+
+    if (newDist) {
+      const match = districts.find(d => d.name === newDist);
+      const newLoc = {
+        state: stateName,
+        district: newDist,
+        lat: match ? match.lat : 9.9252,
+        lon: match ? match.lon : 78.1198
+      };
+      setLocation(newLoc);
+      try {
+        localStorage.setItem("agri_state", stateName);
+        localStorage.setItem("agri_district", newDist);
+        localStorage.setItem("user_location", JSON.stringify(newLoc));
+      } catch (e) {}
     }
+  };
+
+  const handleDistrictChange = (distName: string) => {
+    setSelectedDistrict(distName);
+    const districts = STATE_DISTRICTS[selectedState] || [];
+    const match = districts.find(d => d.name === distName);
+    const newLoc = {
+      state: selectedState,
+      district: distName,
+      lat: match ? match.lat : 9.9252,
+      lon: match ? match.lon : 78.1198
+    };
+    setLocation(newLoc);
+    try {
+      localStorage.setItem("agri_state", selectedState);
+      localStorage.setItem("agri_district", distName);
+      localStorage.setItem("user_location", JSON.stringify(newLoc));
+    } catch (e) {}
   };
 
 
@@ -201,17 +229,25 @@ export default function SettingsPage() {
 
     }
 
-    // 4. Update App Context location coordinates
+    // 4. Update App Context location coordinates and localStorage
     const districts = STATE_DISTRICTS[selectedState] || [];
     const match = districts.find(d => d.name === selectedDistrict);
-    if (match) {
-      setLocation({
-        state: selectedState,
-        district: selectedDistrict,
-        lat: match.lat,
-        lon: match.lon
-      });
-    }
+    const targetLat = match ? match.lat : 9.9252;
+    const targetLon = match ? match.lon : 78.1198;
+
+    const newLoc = {
+      state: selectedState,
+      district: selectedDistrict,
+      lat: targetLat,
+      lon: targetLon
+    };
+
+    setLocation(newLoc);
+    try {
+      localStorage.setItem("agri_state", selectedState);
+      localStorage.setItem("agri_district", selectedDistrict);
+      localStorage.setItem("user_location", JSON.stringify(newLoc));
+    } catch (e) {}
 
     // 5. Show alert
     setShowSuccess(true);
@@ -401,7 +437,7 @@ export default function SettingsPage() {
 
               <div>
                 <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>{L.districtLabel}</label>
-                <select className="input" style={{ width: "100%" }} value={selectedDistrict} onChange={e => setSelectedDistrict(e.target.value)}>
+                <select className="input" style={{ width: "100%" }} value={selectedDistrict} onChange={e => handleDistrictChange(e.target.value)}>
                   {(STATE_DISTRICTS[selectedState] || []).map(d => (
                     <option key={d.name} value={d.name}>{d.name}</option>
                   ))}
