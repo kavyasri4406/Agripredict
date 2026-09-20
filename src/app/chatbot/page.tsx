@@ -456,19 +456,16 @@ export default function ChatbotPage() {
         .chatbot-wrapper {
           display: flex;
           flex-direction: column;
-          height: 100dvh;
+          height: 100%;
+          max-height: 100%;
           overflow: hidden;
           background: var(--bg);
         }
-        @media (max-width: 768px) {
-          .chatbot-wrapper { height: calc(100dvh - 52px) !important; }
-          .chatbot-header { flex-wrap: wrap; gap: 6px; padding: 8px 12px !important; }
-          .chatbot-header > div:last-child { width: 100%; justify-content: flex-end; }
-          .chatbot-messages { padding: 10px 8px !important; }
-          .chatbot-quick-prompts { padding: 6px 8px !important; }
-          .chat-bubble { max-width: 90% !important; font-size: 13px !important; }
-          .chat-input-area { padding: 8px 10px !important; }
-        }
+        .chatbot-header { flex-wrap: wrap; gap: 6px; padding: 8px 12px !important; }
+        .chatbot-messages { padding: 10px 10px !important; }
+        .chatbot-quick-prompts { padding: 6px 10px !important; }
+        .chat-bubble { max-width: 88% !important; font-size: 13px !important; }
+        .chat-input-area { padding: 8px 12px !important; }
         @keyframes pulse-red {
           0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
           70% { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
